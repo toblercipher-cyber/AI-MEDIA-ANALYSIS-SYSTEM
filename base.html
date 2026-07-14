@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- CSS link ek baar yahan -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar yahan -->
+    <nav>...</nav>
+
+    <!-- Har page ka content yahan aayega -->
+    {% block content %}
+    {% endblock %}
+
+    <!-- Footer yahan -->
+    <footer>...</footer>
+
+    <!-- JS link ek baar yahan -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

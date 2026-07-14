@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — AMAS AI</title>
+    <meta name="description" content="AMAS AI Dashboard — Overview of your media analysis activity.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==============================================
+           AMAS AI — Premium Dashboard UI
+           Background: Triangles Falling 3D Animation
+           Backend: 100% PRESERVED
+           ============================================== */
+        :root {
+            --sidebar-w: 260px;
+            --bg-deep: #0a0a0f;
+            --bg-panel: #111118;
+            --bg-card: rgba(255,255,255,0.032);
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.14);
+            --accent: #1DB584;
+            --accent-2: #00C2FF;
+            --text-primary: #EEEEF0;
+            --text-secondary: rgba(255,255,255,0.55);
+            --text-muted: rgba(255,255,255,0.30);
+            --error-bg: rgba(255,75,75,0.13);
+            --error-border: rgba(255,75,75,0.28);
+            --error-text: #FFB3B3;
+            --success-bg: rgba(29,181,132,0.12);
+            --success-text: #1DB584;
+            --video-color: #3b82f6;
+            --doc-color: #22c55e;
+            --danger-color: #ef4444;
+            --r-xl: 20px; --r-lg: 14px; --r-md: 10px; --r-sm: 8px;
+            --f-main: 'Inter', sans-serif;
+            --f-disp: 'Space Grotesk', sans-serif;
+            --f-mono: 'JetBrains Mono', monospace;
+            --ease: 0.22s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-height: 100vh; background: #000; color: var(--text-primary); font-family: var(--f-main); overflow-x: hidden; }
+
+        /* ================ TRIANGLES BACKGROUND ================ */
+        #triangles-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            perspective: 800px;
+            transform-style: preserve-3d;
+            background: #000;
+            background-image: radial-gradient(circle at center, rgba(255,255,255,0.06) 0%, rgba(34,34,34,0.08) 10%, black 60%);
+            pointer-events: none;
+        }
+
+        .tri-piece {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 0;
+            width: 0;
+            opacity: 0;
+            filter: grayscale(1);
+        }
+
+        /* Vignette overlay above triangles */
+        .vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: radial-gradient(circle at center, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.88) 100%);
+        }
+
+        /* ================ APP SHELL ================ */
+        .app-shell { position: relative; z-index: 2; display: flex; width: 100%; min-height: 100vh; }
+
+        /* ================ SIDEBAR ================ */
+        .sidebar { width: var(--sidebar-w); min-height: 100vh; background: rgba(17,17,24,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; transition: transform var(--ease); overflow: hidden; }
+        .sidebar.collapsed { transform: translateX(calc(-1 * var(--sidebar-w))); }
+        .sidebar-header { padding: 20px 18px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .sidebar-logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; font-family: var(--f-disp); font-size: 13px; font-weight: 800; color: #fff; flex-shrink: 0; }
+        .sidebar-brand { font-family: var(--f-disp); font-size: 15px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.01em; }
+        .sidebar-brand span { color: var(--accent); }
+        .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+        .sidebar-sec-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); padding: 8px 8px 4px; margin-top: 8px; }
+        .sidebar-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--r-sm); font-size: 13.5px; font-weight: 500; color: var(--text-secondary); cursor: pointer; text-decoration: none; transition: background var(--ease), color var(--ease); margin-bottom: 2px; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+        .sidebar-item.active { background: rgba(29,181,132,0.12); color: var(--accent); }
+        .sidebar-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
+        .sidebar-item.active svg { opacity: 1; }
+        .sidebar-footer { padding: 14px 12px; border-top: 1px solid var(--border); }
+        .sidebar-user { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--r-md); cursor: pointer; transition: background var(--ease); }
+        .sidebar-user:hover { background: rgba(255,255,255,0.05); }
+        .user-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .user-plan { font-size: 11px; color: var(--text-muted); }
+
+        /* ================ MAIN CONTENT ================ */
+        .main-content { flex: 1; margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; transition: margin-left var(--ease); }
+        .main-content.expanded { margin-left: 0; }
+
+        /* ================ TOPBAR ================ */
+        .topbar { position: sticky; top: 0; z-index: 50; background: rgba(10,10,15,0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .topbar-left { display: flex; align-items: center; gap: 14px; }
+        .sidebar-toggle { width: 34px; height: 34px; border-radius: var(--r-sm); background: var(--bg-card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: all var(--ease); }
+        .sidebar-toggle:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+        .topbar-title { font-family: var(--f-disp); font-size: 15px; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+        .topbar-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; letter-spacing: 0.04em; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--r-md); background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: all var(--ease); font-family: var(--f-main); text-decoration: none; }
+        .topbar-btn:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); border-color: var(--border-hover); }
+        .topbar-btn.logout { color: #FF6B6B; border-color: rgba(255,107,107,0.2); }
+        .topbar-btn.logout:hover { background: rgba(255,107,107,0.08); border-color: rgba(255,107,107,0.4); color: #ff8a8a; }
+
+        /* ================ PAGE BODY ================ */
+        .page-body { flex: 1; display: flex; flex-direction: column; padding: 0 28px 52px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+        /* ================ WELCOME ================ */
+        .welcome-block { padding: 42px 0 32px; opacity: 0; transform: translateY(30px); }
+        .welcome-label { font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+        .welcome-label::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse-dot 2s ease-in-out infinite; }
+        @keyframes pulse-dot { 0%,100%{opacity:1; box-shadow: 0 0 8px var(--accent);} 50%{opacity:0.5; box-shadow: 0 0 16px var(--accent);} }
+        .welcome-title { font-family: var(--f-disp); font-size: clamp(24px, 4vw, 36px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--text-primary); }
+        .welcome-title .accent { color: var(--accent); }
+        .welcome-sub { font-size: 14px; color: var(--text-secondary); margin-top: 8px; line-height: 1.6; }
+
+        /* ================ STATS GRID ================ */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+        .stat-card { position: relative; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 20px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: border-color var(--ease), background var(--ease), transform var(--ease), box-shadow var(--ease); overflow: hidden; opacity: 0; transform: translateY(30px); }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(29,181,132,0.4), transparent); opacity: 0; transition: opacity var(--ease); }
+        .stat-card:hover { border-color: rgba(29,181,132,0.25); background: rgba(255,255,255,0.044); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+        .stat-card:hover::before { opacity: 1; }
+        .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .stat-id { font-family: var(--f-mono); font-size: 9px; color: var(--text-muted); letter-spacing: 0.15em; }
+        .stat-icon-wrap { width: 36px; height: 36px; border-radius: var(--r-md); background: rgba(29,181,132,0.08); border: 1px solid rgba(29,181,132,0.15); display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all var(--ease); }
+        .stat-card:hover .stat-icon-wrap { background: rgba(29,181,132,0.14); border-color: rgba(29,181,132,0.3); transform: scale(1.08); }
+        .stat-value { font-family: var(--f-disp); font-size: clamp(28px, 3vw, 38px); font-weight: 800; letter-spacing: -0.03em; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+        .stat-label { font-family: var(--f-mono); font-size: 10px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
+        .stat-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+        .stat-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 99px; width: 0%; transition: width 1.8s cubic-bezier(0.4,0,0.2,1); }
+
+        /* ================ SESSIONS ================ */
+        .sessions-block { display: flex; flex-direction: column; gap: 16px; opacity: 0; transform: translateY(30px); }
+        .sessions-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .sessions-title { font-family: var(--f-disp); font-size: 18px; font-weight: 700; color: var(--text-primary); }
+        .btn-new { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 11px; font-weight: 700; padding: 8px 18px; border: 1px solid rgba(29,181,132,0.3); border-radius: 50px; color: var(--accent); text-decoration: none; transition: all var(--ease); letter-spacing: 0.04em; }
+        .btn-new:hover { background: rgba(29,181,132,0.12); border-color: var(--accent); box-shadow: 0 0 16px rgba(29,181,132,0.15); }
+
+        /* ---- Table ---- */
+        .table-wrapper { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden; backdrop-filter: blur(12px); }
+        .sessions-table { width: 100%; border-collapse: collapse; }
+        .sessions-table thead tr { border-bottom: 1px solid var(--border); }
+        .sessions-table th { font-family: var(--f-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); padding: 14px 18px; text-align: left; }
+        .sessions-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.03); transition: background var(--ease); }
+        .sessions-table tbody tr:last-child { border-bottom: none; }
+        .sessions-table tbody tr:hover { background: rgba(29,181,132,0.03); }
+        .sessions-table td { padding: 14px 18px; font-size: 13px; color: var(--text-secondary); vertical-align: middle; }
+        .td-id { font-family: var(--f-mono); font-size: 10px; color: var(--text-muted) !important; letter-spacing: 0.12em; width: 50px; }
+        .td-title { max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-primary) !important; font-weight: 600; }
+        .td-date { font-family: var(--f-mono); font-size: 11px; color: var(--text-muted) !important; }
+
+        /* ---- Badges ---- */
+        .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-family: var(--f-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+        .badge-video { background: rgba(59,130,246,0.12); color: var(--video-color); border: 1px solid rgba(59,130,246,0.22); }
+        .badge-doc { background: rgba(34,197,94,0.12); color: var(--doc-color); border: 1px solid rgba(34,197,94,0.22); }
+        .badge-done { background: rgba(29,181,132,0.1); color: var(--accent); border: 1px solid rgba(29,181,132,0.2); }
+
+        /* ---- Action Buttons ---- */
+        .action-buttons { display: flex; gap: 6px; justify-content: flex-end; }
+        .btn-continue, .btn-open { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(29,181,132,0.3); background: rgba(29,181,132,0.08); color: var(--accent); font-family: var(--f-mono); font-size: 10px; font-weight: 700; cursor: pointer; transition: all var(--ease); letter-spacing: 0.04em; }
+        .btn-continue:hover, .btn-open:hover { background: rgba(29,181,132,0.18); border-color: var(--accent); box-shadow: 0 0 12px rgba(29,181,132,0.15); transform: translateY(-1px); }
+        .btn-delete { padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(239,68,68,0.2); background: rgba(239,68,68,0.06); color: var(--danger-color); font-family: var(--f-mono); font-size: 10px; font-weight: 700; cursor: pointer; transition: all var(--ease); letter-spacing: 0.04em; }
+        .btn-delete:hover { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.5); transform: translateY(-1px); }
+
+        /* ---- Empty / Loading ---- */
+        .loading-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 14px; }
+        .empty-state { text-align: center; padding: 48px 20px; }
+        .empty-state-icon { width: 56px; height: 56px; border-radius: 50%; background: rgba(29,181,132,0.08); border: 1px solid rgba(29,181,132,0.15); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px; }
+        .empty-state-message { margin: 12px 0 20px; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+        .btn-new-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 28px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; border-radius: 50px; border: none; cursor: pointer; font-family: var(--f-disp); font-weight: 700; font-size: 13px; text-decoration: none; transition: all 0.28s cubic-bezier(0.4,0,0.2,1); box-shadow: 0 4px 18px rgba(29,181,132,0.3); }
+        .btn-new-primary:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 8px 28px rgba(29,181,132,0.45); }
+
+        /* ---- Toast ---- */
+        .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: var(--r-lg); background: rgba(17,17,24,0.95); backdrop-filter: blur(12px); color: var(--text-primary); border: 1px solid var(--border); box-shadow: 0 12px 40px rgba(0,0,0,0.4); display: none; z-index: 1000; font-size: 13px; font-weight: 500; animation: toastIn 0.3s ease; }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ---- Sidebar Overlay ---- */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity var(--ease); }
+        .sidebar-overlay.visible { opacity: 1; pointer-events: auto; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0 !important; }
+            .page-body { padding: 0 16px 40px; }
+            .topbar { padding: 10px 16px; }
+            .welcome-block { padding: 28px 0 20px; }
+            .sidebar-overlay { display: block; }
+            .td-title { max-width: 140px; }
+        }
+        @media (max-width: 540px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .sessions-table th:nth-child(4), .sessions-table td:nth-child(4) { display: none; }
+            .topbar-btn span { display: none; }
+            .topbar-btn { padding: 7px; }
+        }
+
+        /* ---- Scrollbar ---- */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+    </style>
+</head>
+<body>
+
+    <!-- ============ TRIANGLES FALLING BACKGROUND ============ -->
+    <div id="triangles-bg"></div>
+    <div class="vignette"></div>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="app-shell">
+
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="sidebar" id="sidebar" aria-label="Application Sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo" aria-hidden="true">A</div>
+                <span class="sidebar-brand">AMAS <span>AI</span></span>
+            </div>
+            <nav class="sidebar-nav" aria-label="Main navigation">
+                <div class="sidebar-sec-lbl">Main</div>
+                <a href="#" class="sidebar-item active" aria-current="page">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('url_analysis') }}" class="sidebar-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    URL
+                </a>
+                <a href="{{ url_for('document_analysis') }}" class="sidebar-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    Docs
+                </a>
+                <a href="{{ url_for('history') }}" class="sidebar-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    His
+                </a>
+                <a href="{{ url_for('faq') }}" class="sidebar-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    FAQ
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user" role="button" tabindex="0" aria-label="User profile">
+                    <div class="user-avatar" aria-hidden="true">{{ user_name[0] if user_name else 'U' }}</div>
+                    <div>
+                        <div class="user-name">{{ user_name }}</div>
+                        <div class="user-plan">Free Plan</div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:auto;color:var(--text-muted)"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ============ MAIN CONTENT ============ -->
+        <div class="main-content" id="main-content">
+
+            <header class="topbar" role="banner">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle sidebar" aria-expanded="true" aria-controls="sidebar" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <div class="topbar-title">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted)"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+                        Dashboard
+                        <span class="topbar-badge">AI</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <a href="{{ url_for('url_analysis') }}" class="topbar-btn" aria-label="New Analysis">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                        <span>New</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="topbar-btn logout" aria-label="Logout">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </header>
+
+            <main class="page-body" role="main">
+
+                <!-- PRESERVED: id="welcome" -->
+                <div class="welcome-block" id="welcome">
+                    <p class="welcome-label">AMAS // DASHBOARD</p>
+                    <h1 class="welcome-title">Welcome back<span class="accent">, {{ user_name }}</span></h1>
+                    <p class="welcome-sub">Here's an overview of your media analysis activity.</p>
+                </div>
+
+                <!-- PRESERVED: id="stats" + stat IDs -->
+                <div class="stats-grid" id="stats">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-id">001</span>
+                            <div class="stat-icon-wrap">🎬</div>
+                        </div>
+                        <h3 class="stat-value" id="stat-videos">0</h3>
+                        <p class="stat-label">Total Videos</p>
+                        <div class="stat-bar"><div class="stat-fill" style="width:60%"></div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-id">002</span>
+                            <div class="stat-icon-wrap">📄</div>
+                        </div>
+                        <h3 class="stat-value" id="stat-documents">0</h3>
+                        <p class="stat-label">Total Documents</p>
+                        <div class="stat-bar"><div class="stat-fill" style="width:40%"></div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-id">003</span>
+                            <div class="stat-icon-wrap">💬</div>
+                        </div>
+                        <h3 class="stat-value" id="stat-messages">0</h3>
+                        <p class="stat-label">Total Messages</p>
+                        <div class="stat-bar"><div class="stat-fill" style="width:80%"></div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-id">004</span>
+                            <div class="stat-icon-wrap">📊</div>
+                        </div>
+                        <h3 class="stat-value" id="stat-sessions">0</h3>
+                        <p class="stat-label">Total Sessions</p>
+                        <div class="stat-bar"><div class="stat-fill" style="width:50%"></div></div>
+                    </div>
+                </div>
+
+                <!-- PRESERVED: id="sessions" + sessions-tbody + loading-row + empty-sessions -->
+                <div class="sessions-block" id="sessions">
+                    <div class="sessions-header">
+                        <h2 class="sessions-title">Recent Sessions</h2>
+                        <a href="{{ url_for('url_analysis') }}" class="btn-new">+ New Analysis</a>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="sessions-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th><th>Title</th><th>Type</th>
+                                    <th>Date</th><th>Status</th><th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sessions-tbody">
+                                <tr id="loading-row">
+                                    <td colspan="6" class="loading-state">Loading your sessions...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="empty-sessions" class="empty-state" style="display: none;">
+                        <div class="empty-state-icon">🚀</div>
+                        <p class="empty-state-message">No sessions yet. Start by analyzing a YouTube video or document!</p>
+                        <a href="{{ url_for('url_analysis') }}" class="btn-new-primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                            Analyze Now
+                        </a>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ✅ ONLY GSAP — three.js & script.js REMOVED (aurora is gone) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script>
+        /* =====================================================
+           1) TRIANGLES FALLING — 3D CSS Animation
+           Pure CSS, no Three.js. 200 animated triangle sprites.
+           ===================================================== */
+        (function () {
+            const container = document.getElementById('triangles-bg');
+            if (!container) return;
+
+            const TOTAL = 200;
+            let keyframesCSS = '';
+
+            for (let i = 0; i < TOTAL; i++) {
+                const size     = Math.random() * 50;
+                const rotate   = Math.random() * 360;
+                const hue      = Math.floor(Math.random() * 360);
+                const delaySec = -(i * (10 / TOTAL));
+                const tx       = (Math.random() * 1000) - 500;
+                const ty       = (Math.random() * 1000) - 500;
+
+                const tri = document.createElement('div');
+                tri.className = 'tri-piece';
+                tri.style.borderTop     = size + 'px solid hsla(' + hue + ',100%,50%,1)';
+                tri.style.borderRight   = size + 'px solid transparent';
+                tri.style.borderLeft    = size + 'px solid transparent';
+                tri.style.marginLeft    = '-' + (size / 2) + 'px';
+                tri.style.marginTop     = '-' + (size / 2) + 'px';
+                tri.style.transform     = 'rotate(' + rotate + 'deg) translate3d(0,0,-1500px) scale(0)';
+                tri.style.animation     = 'triAnim' + i + ' 10s infinite linear';
+                tri.style.animationDelay = delaySec.toFixed(3) + 's';
+                container.appendChild(tri);
+
+                keyframesCSS +=
+                    '@keyframes triAnim' + i +
+                    '{0%{opacity:1;transform:rotate(' + (rotate * 1.5) + 'deg) translate3d(' +
+                    tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px,1000px) scale(1);}}';
+            }
+
+            const styleEl = document.createElement('style');
+            styleEl.textContent = keyframesCSS;
+            document.head.appendChild(styleEl);
+        })();
+
+        /* =====================================================
+           2) GSAP REVEAL ANIMATIONS
+           — Welcome block
+           — Stat cards stagger
+           — Sessions block
+           — Stat bar fill on settle
+           ===================================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof gsap === 'undefined') return;
+
+            const welcome = document.getElementById('welcome');
+            if (welcome) {
+                gsap.to(welcome, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    delay: 0.3,
+                    ease: 'power3.out'
+                });
+            }
+
+            const statCards = document.querySelectorAll('.stat-card');
+            if (statCards.length) {
+                gsap.fromTo(statCards,
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.7, stagger: 0.12, delay: 0.6, ease: 'power3.out' }
+                );
+            }
+
+            const sessions = document.getElementById('sessions');
+            if (sessions) {
+                gsap.fromTo(sessions,
+                    { opacity: 0, y: 30 },
+                    { opacity: 1, y: 0, duration: 0.8, delay: 1.1, ease: 'power3.out' }
+                );
+            }
+
+            // Animate the colored stat bars to their target widths
+            setTimeout(() => {
+                document.querySelectorAll('.stat-fill').forEach(bar => {
+                    const target = bar.style.width;
+                    bar.style.width = '0%';
+                    requestAnimationFrame(() => {
+                        setTimeout(() => { bar.style.width = target; }, 50);
+                    });
+                });
+            }, 900);
+        });
+
+        /* =====================================================
+           3) SIDEBAR TOGGLE
+           ===================================================== */
+        const sidebarBtn  = document.getElementById('sidebar-toggle-btn');
+        const sidebar     = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const overlayEl   = document.getElementById('sidebar-overlay');
+
+        let sidebarOpen = window.innerWidth > 768;
+        function setSidebar(open) {
+            sidebarOpen = open;
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('open', open);
+                overlayEl.classList.toggle('visible', open);
+            } else {
+                sidebar.classList.toggle('collapsed', !open);
+                mainContent.classList.toggle('expanded', !open);
+                overlayEl.classList.remove('visible');
+            }
+            sidebarBtn.setAttribute('aria-expanded', String(open));
+        }
+        sidebarBtn.addEventListener('click', () => setSidebar(!sidebarOpen));
+        overlayEl.addEventListener('click', () => setSidebar(false));
+
+        // Reset layout on resize between breakpoints
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('open');
+                overlayEl.classList.remove('visible');
+                if (sidebarOpen) {
+                    sidebar.classList.remove('collapsed');
+                    mainContent.classList.remove('expanded');
+                } else {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('expanded');
+                }
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('expanded');
+            }
+        });
+
+        /* =====================================================
+           4) DASHBOARD FUNCTIONALITY (Backend-facing, preserved)
+           ===================================================== */
+        const toast      = document.getElementById('toast');
+        const tbody      = document.getElementById('sessions-tbody');
+        const emptyState = document.getElementById('empty-sessions');
+        const loadingRow = document.getElementById('loading-row');
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 2500);
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Unknown';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function getTypeIcon(type) {
+            return type.toUpperCase() === 'URL' ? '🔗' : '📄';
+        }
+
+        async function loadDashboard() {
+            try {
+                const res = await fetch('/api/dashboard');
+                const data = await res.json();
+
+                if (!data.success) {
+                    showToast('Failed to load dashboard');
+                    return;
+                }
+
+                const stats = data.stats || {};
+                document.getElementById('stat-videos').textContent    = stats.total_videos    || 0;
+                document.getElementById('stat-documents').textContent = stats.total_documents || 0;
+                document.getElementById('stat-messages').textContent  = stats.total_messages  || 0;
+                document.getElementById('stat-sessions').textContent  = stats.total_sessions  || 0;
+
+                const conversations = data.conversations || [];
+                loadingRow.style.display = 'none';
+
+                if (conversations.length === 0) {
+                    emptyState.style.display = 'block';
+                    tbody.innerHTML = '';
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+                tbody.innerHTML = '';
+
+                conversations.slice(0, 5).forEach((conv, index) => {
+                    const row = document.createElement('tr');
+                    const typeLabel   = conv.conversation_type === 'URL' ? 'Video' : 'Document';
+                    const badgeClass  = conv.conversation_type === 'URL' ? 'badge-video' : 'badge-doc';
+
+                    row.innerHTML = `
+                        <td class="td-id">${String(index + 1).padStart(3, '0')}</td>
+                        <td class="td-title">${escapeHtml(conv.title || 'Untitled')}</td>
+                        <td><span class="badge ${badgeClass}">${typeLabel}</span></td>
+                        <td class="td-date">${formatDate(conv.created_at)}</td>
+                        <td><span class="badge badge-done">Done</span></td>
+                        <td class="td-actions">
+                            <div class="action-buttons">
+                                <button class="btn-continue" data-id="${conv.conversation_id}">Continue</button>
+                                <button class="btn-delete"   data-id="${conv.conversation_id}">Delete</button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                document.querySelectorAll('.btn-continue').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const id = e.currentTarget.dataset.id;
+                        window.location.href = `/chat?id=${id}`;
+                    });
+                });
+
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.id;
+                        if (confirm('Delete this conversation?')) {
+                            deleteConversation(id);
+                        }
+                    });
+                });
+
+            } catch (err) {
+                console.error('Error loading dashboard:', err);
+                loadingRow.innerHTML = '<td colspan="6" class="loading-state">Error loading sessions</td>';
+            }
+        }
+
+        async function deleteConversation(conversationId) {
+            try {
+                const res = await fetch(`/api/conversation/${conversationId}/delete`, { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Conversation deleted');
+                    loadDashboard();
+                } else {
+                    showToast('Failed to delete conversation');
+                }
+            } catch (err) {
+                console.error('Error deleting conversation:', err);
+                showToast('Error deleting conversation');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        loadDashboard();
+    </script>
+
+</body>
+</html>

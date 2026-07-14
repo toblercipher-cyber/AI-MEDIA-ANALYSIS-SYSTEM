@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat — AMAS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/dashboard.css">
+    
+    <style>
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .chat-back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-back-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .chat-title-block h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .chat-title-block p {
+            margin: 4px 0 0 0;
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: 500px;
+            overflow-y: auto;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 20px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: rgba(0, 191, 255, 0.2);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            color: #fff;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.9);
+        }
+
+        .chat-input-section {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255,255,255,0.45);
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: rgba(0, 191, 255, 0.3);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .chat-send-btn {
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: none;
+            background: #00bfff;
+            color: #fff;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+
+        .chat-send-btn:hover:not(:disabled) {
+            background: #00a8cc;
+            transform: translateY(-1px);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .loading-indicator.active {
+            display: block;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #111827;
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.28);
+            display: none;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .error-message {
+            padding: 14px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            color: #ef4444;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="dot-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <button class="chat-back-btn" id="backBtn" title="Back to History">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div class="chat-title-block">
+                <h1 id="chatTitle">Loading...</h1>
+                <p id="chatType"></p>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="loading-indicator active" id="loadingIndicator">
+                <p>Loading conversation...</p>
+            </div>
+        </div>
+
+        <div class="chat-input-section">
+            <input 
+                type="text" 
+                id="messageInput" 
+                class="chat-input" 
+                placeholder="Ask a follow-up question..." 
+                disabled
+            >
+            <button class="chat-send-btn" id="sendBtn" disabled>Send</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="../static/script.js"></script>
+
+    <script>
+        // ============================================================
+        // CONVERSATION VIEW - Chat Interface
+        // ============================================================
+
+        const elements = {
+            chatMessages: document.getElementById('chatMessages'),
+            messageInput: document.getElementById('messageInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            backBtn: document.getElementById('backBtn'),
+            chatTitle: document.getElementById('chatTitle'),
+            chatType: document.getElementById('chatType'),
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            errorMessage: document.getElementById('errorMessage'),
+            toast: document.getElementById('toast')
+        };
+
+        let conversationId = null;
+        let isLoading = false;
+
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            conversationId = urlParams.get('id');
+
+            if (!conversationId) {
+                showError('No conversation ID provided');
+                return;
+            }
+
+            loadConversation();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            elements.backBtn.addEventListener('click', () => {
+                window.location.href = '/history';
+            });
+
+            elements.sendBtn.addEventListener('click', sendMessage);
+            elements.messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !isLoading) {
+                    sendMessage();
+                }
+            });
+        }
+
+        // ============================================================
+        // LOAD CONVERSATION
+        // ============================================================
+
+        async function loadConversation() {
+            try {
+                elements.loadingIndicator.classList.add('active');
+                elements.messageInput.disabled = true;
+                elements.sendBtn.disabled = true;
+
+                const res = await fetch(`/api/conversation/${conversationId}`);
+                const data = await res.json();
+
+                if (!data.success) {
+                    showError(data.message || 'Failed to load conversation');
+                    return;
+                }
+
+                // Set conversation info
+                const source = data.source || {};
+                const sourceType = source.source_type || data.messages?.[0]?.type || 'Unknown';
+                const title = source.extracted_title || 'Conversation';
+
+                elements.chatTitle.textContent = title;
+                elements.chatType.textContent = sourceType === 'URL' ? '🔗 YouTube Video' : '📄 Document';
+
+                // Display messages
+                elements.chatMessages.innerHTML = '';
+                const messages = data.messages || [];
+
+                if (messages.length === 0) {
+                    elements.chatMessages.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">No messages yet. Start by asking a question.</p>';
+                } else {
+                    messages.forEach(msg => {
+                        addMessageToUI(msg.content, msg.role);
+                    });
+                }
+
+                elements.loadingIndicator.classList.remove('active');
+                elements.messageInput.disabled = false;
+                elements.sendBtn.disabled = false;
+                elements.messageInput.focus();
+
+            } catch (err) {
+                console.error('Error loading conversation:', err);
+                showError('Error loading conversation: ' + err.message);
+            }
+        }
+
+        // ============================================================
+        // SEND MESSAGE
+        // ============================================================
+
+        async function sendMessage() {
+            const message = elements.messageInput.value.trim();
+
+            if (!message || isLoading) {
+                return;
+            }
+
+            try {
+                isLoading = true;
+                elements.sendBtn.disabled = true;
+
+                // Add user message to UI immediately
+                addMessageToUI(message, 'user');
+                elements.messageInput.value = '';
+
+                // Send to backend
+                const res = await fetch(`/api/conversation/${conversationId}/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message
+                    })
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    showError(data.message || 'Failed to send message');
+                    return;
+                }
+
+                // Add AI response to UI
+                const aiResponse = data.response || 'Unable to generate response';
+                addMessageToUI(aiResponse, 'assistant');
+
+            } catch (err) {
+                console.error('Error sending message:', err);
+                showError('Error sending message: ' + err.message);
+            } finally {
+                isLoading = false;
+                elements.sendBtn.disabled = false;
+            }
+        }
+
+        // ============================================================
+        // UI HELPERS
+        // ============================================================
+
+        function addMessageToUI(content, role) {
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+            div.textContent = content;
+            elements.chatMessages.appendChild(div);
+            elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
+        }
+
+        function showError(message) {
+            elements.errorMessage.textContent = message;
+            elements.errorMessage.classList.add('show');
+            elements.loadingIndicator.classList.remove('active');
+        }
+
+        function showToast(message) {
+            elements.toast.textContent = message;
+            elements.toast.classList.add('show');
+            setTimeout(() => elements.toast.classList.remove('show'), 2500);
+        }
+
+        // ============================================================
+        // AURORA BACKGROUND
+        // ============================================================
+
+        (function () {
+            const canvas = document.getElementById('dot-canvas');
+            if (!canvas || typeof THREE === 'undefined') return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    iTime: { value: 0 },
+                    iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+                },
+                vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
+                fragmentShader: `
+                    uniform float iTime;
+                    uniform vec2 iResolution;
+                    #define NUM_OCTAVES 3
+                    float rand(vec2 n) { return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); }
+                    float noise(vec2 p) {
+                        vec2 ip = floor(p);
+                        vec2 u = fract(p);
+                        u = u * u * (3.0 - 2.0 * u);
+                        float res = mix(mix(rand(ip), rand(ip + vec2(1.0, 0.0)), u.x),
+                            mix(rand(ip + vec2(0.0, 1.0)), rand(ip + vec2(1.0, 1.0)), u.x), u.y);
+                        return res * res;
+                    }
+                    float fbm(vec2 x) {
+                        float v = 0.0;
+                        float a = 0.3;
+                        vec2 shift = vec2(100);
+                        mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+                        for (int i = 0; i < NUM_OCTAVES; ++i) {
+                            v += a * noise(x);
+                            x = rot * x * 2.0 + shift;
+                            a *= 0.4;
+                        }
+                        return v;
+                    }
+                    void main() {
+                        vec2 shake = vec2(sin(iTime * 1.2) * 0.005, cos(iTime * 2.1) * 0.005);
+                        vec2 p = ((gl_FragCoord.xy + shake * iResolution.xy) - iResolution.xy * 0.5) / iResolution.y * mat2(6.0, -4.0, 4.0, 6.0);
+                        vec2 v;
+                        vec4 o = vec4(0.0);
+                        float f = 2.0 + fbm(p + vec2(iTime * 5.0, 0.0)) * 0.5;
+                        for (float i = 0.0; i < 35.0; i++) {
+                            v = p + cos(i * i + (iTime + p.x * 0.08) * 0.025 + i * vec2(13.0, 11.0)) * 3.5
+                                  + vec2(sin(iTime * 3.0 + i) * 0.003, cos(iTime * 3.5 - i) * 0.003);
+                            float tailNoise = fbm(v + vec2(iTime * 0.5, i)) * 0.3 * (1.0 - (i / 35.0));
+                            vec4 auroraColors = vec4(
+                                0.0 + 0.1 * sin(i * 0.2 + iTime * 0.4),
+                                0.4 + 0.5 * cos(i * 0.3 + iTime * 0.5),
+                                0.7 + 0.3 * sin(i * 0.4 + iTime * 0.3),
+                                1.0
+                            );
+                            vec4 currentContribution = auroraColors * exp(sin(i * i + iTime * 0.8)) / length(max(v, vec2(v.x * f * 0.015, v.y * 1.5)));
+                            float thinnessFactor = smoothstep(0.0, 1.0, i / 35.0) * 0.6;
+                            o += currentContribution * (1.0 + tailNoise * 0.8) * thinnessFactor;
+                        }
+                        o = tanh(pow(o / 100.0, vec4(1.6)));
+                        gl_FragColor = o * 1.2;
+                    }
+                `
+            });
+
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            scene.add(new THREE.Mesh(geometry, material));
+
+            function animate() {
+                material.uniforms.iTime.value += 0.016;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            }
+            animate();
+
+            window.addEventListener('resize', () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                material.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+            });
+        })();
+    </script>
+
+</body>
+</html>

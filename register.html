@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account — AMAS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/register.css">
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <main class="register">
+
+        <section class="register-card" id="reveal">
+
+            <div class="register-mark" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+                    <rect x="2" y="2" width="28" height="28" rx="6" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M16 9L9 23M16 9L23 23M12 19H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <div class="register-head">
+                <div class="register-eyebrow">
+                    <span class="register-eyebrow-dot"></span>
+                    <span class="register-eyebrow-label">006 // REGISTER</span>
+                </div>
+                <h1 class="register-title">
+                    CREATE<br>
+                    <span class="register-title-outline">ACCOUNT</span>
+                </h1>
+                <p class="register-sub">Join AMAS to start analyzing media with AI.</p>
+            </div>
+
+            <form class="register-form" id="register-form" novalidate autocomplete="on">
+
+                <div class="register-field">
+                    <label for="reg-name" class="register-label">001 // FULL NAME</label>
+                    <input type="text" id="reg-name" name="name" class="register-input" placeholder="John Doe" autocomplete="name" required>
+                </div>
+
+                <div class="register-field">
+                    <label for="reg-email" class="register-label">002 // EMAIL</label>
+                    <input type="email" id="reg-email" name="email" class="register-input" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+
+                <div class="register-field">
+                    <label for="reg-password" class="register-label">003 // PASSWORD</label>
+                    <div class="register-pw">
+                        <input type="password" id="reg-password" name="password" class="register-input" placeholder="Minimum 8 characters" autocomplete="new-password" minlength="8" required>
+                        <button type="button" class="register-pw-toggle" id="pw-toggle" aria-label="Show password">
+                            <svg class="pw-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <svg class="pw-eye-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+                                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
+                                <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
+                                <line x1="2" x2="22" y1="2" y2="22"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <label class="register-terms">
+                    <input type="checkbox" id="reg-terms" name="terms" class="register-check" required>
+                    <span class="register-terms-text">I agree to the <button type="button" class="register-terms-link" id="open-terms">Terms &amp; Conditions</button></span>
+                </label>
+
+                <div class="register-error" id="register-error" role="alert" hidden></div>
+
+                <button type="submit" class="register-btn">
+                    <span>Create Account</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M7 17L17 7M17 7H8M17 7V16"/>
+                    </svg>
+                </button>
+            </form>
+
+            <div class="register-foot">
+                <span>Already have an account?</span>
+                <!-- ✅ CHANGE 1: Login link now uses Flask url_for instead of ../templates/login.html -->
+                <a href="{{ url_for('login') }}" class="register-link">Sign in</a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Terms Modal -->
+    <div class="modal" id="terms-modal" hidden aria-hidden="true">
+        <div class="modal-backdrop" data-close></div>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="terms-title">
+            <div class="modal-head">
+                <div class="modal-eyebrow">
+                    <span class="modal-eyebrow-dot"></span>
+                    <span class="modal-eyebrow-label">LEGAL // TOC</span>
+                </div>
+                <h2 class="modal-title" id="terms-title">Terms &amp; Conditions</h2>
+                <button type="button" class="modal-close" data-close aria-label="Close">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="terms-body" tabindex="0">
+                <div class="terms-section">
+                    <h3>Acceptance of Terms</h3>
+                    <p>By accessing and using this website, users agree to comply with and be bound by these Terms of Service. Users who do not agree with these terms should discontinue use of the website immediately.</p>
+                </div>
+                <div class="terms-section">
+                    <h3>User Account Responsibilities</h3>
+                    <p>Users are responsible for maintaining the confidentiality of their account credentials. Any activities occurring under a user's account are the sole responsibility of the account holder. Users must notify the website administrators immediately of any unauthorized account access.</p>
+                </div>
+                <div class="terms-section">
+                    <h3>Content Usage and Restrictions</h3>
+                    <p>The website and its original content are protected by intellectual property laws. Users may not reproduce, distribute, modify, create derivative works, or commercially exploit any content without explicit written permission from the website owners.</p>
+                </div>
+                <div class="terms-section">
+                    <h3>Limitation of Liability</h3>
+                    <p>The website provides content "as is" without any warranties. The website owners shall not be liable for direct, indirect, incidental, consequential, or punitive damages arising from user interactions with the platform.</p>
+                </div>
+                <div class="terms-section">
+                    <h3>User Conduct Guidelines</h3>
+                    <ul>
+                        <li>Not upload harmful or malicious content</li>
+                        <li>Respect the rights of other users</li>
+                        <li>Avoid activities that could disrupt website functionality</li>
+                        <li>Comply with applicable local and international laws</li>
+                    </ul>
+                </div>
+                <div class="terms-section">
+                    <h3>Modifications to Terms</h3>
+                    <p>The website reserves the right to modify these terms at any time. Continued use of the website after changes constitutes acceptance of the new terms.</p>
+                </div>
+                <div class="terms-section">
+                    <h3>Termination Clause</h3>
+                    <p>The website may terminate or suspend user access without prior notice for violations of these terms or for any other reason deemed appropriate by the administration.</p>
+                </div>
+                <div class="terms-section">
+                    <h3>Governing Law</h3>
+                    <p>These terms are governed by the laws of the jurisdiction where the website is primarily operated, without regard to conflict of law principles.</p>
+                </div>
+            </div>
+            <div class="modal-foot">
+                <span class="modal-hint" id="terms-hint">Read all terms before accepting.</span>
+                <button type="button" class="modal-btn modal-btn-ghost" data-close>Cancel</button>
+                <button type="button" class="modal-btn modal-btn-accent" id="agree-btn" disabled>I agree</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="../static/script.js"></script>
+    <script>
+    (function () {
+        // ---- Password show/hide ----
+        var pwInput = document.getElementById('reg-password');
+        var pwToggle = document.getElementById('pw-toggle');
+        if (pwToggle && pwInput) {
+            var eye = pwToggle.querySelector('.pw-eye');
+            var eyeOff = pwToggle.querySelector('.pw-eye-off');
+            pwToggle.addEventListener('click', function () {
+                var isHidden = pwInput.type === 'password';
+                pwInput.type = isHidden ? 'text' : 'password';
+                if (eye) eye.hidden = isHidden;
+                if (eyeOff) eyeOff.hidden = !isHidden;
+                pwToggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            });
+        }
+
+        // ---- Terms modal ----
+        var modal = document.getElementById('terms-modal');
+        var openBtn = document.getElementById('open-terms');
+        var body = document.getElementById('terms-body');
+        var agreeBtn = document.getElementById('agree-btn');
+        var hint = document.getElementById('terms-hint');
+        var checkInput = document.getElementById('reg-terms');
+        var closers = modal ? modal.querySelectorAll('[data-close]') : [];
+
+        function openModal() {
+            if (!modal) return;
+            modal.hidden = false;
+            modal.setAttribute('aria-hidden', 'false');
+            if (body) body.scrollTop = 0;
+            if (agreeBtn) agreeBtn.disabled = true;
+            if (hint) hint.style.display = '';
+        }
+        function closeModal() {
+            if (!modal) return;
+            modal.hidden = true;
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        if (openBtn) openBtn.addEventListener('click', openModal);
+        closers.forEach(function (el) { el.addEventListener('click', closeModal); });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal && !modal.hidden) closeModal();
+        });
+
+        if (body && agreeBtn) {
+            body.addEventListener('scroll', function () {
+                var max = body.scrollHeight - body.clientHeight;
+                if (max <= 0) {
+                    agreeBtn.disabled = false;
+                    if (hint) hint.style.display = 'none';
+                    return;
+                }
+                var pct = body.scrollTop / max;
+                if (pct >= 0.99) {
+                    agreeBtn.disabled = false;
+                    if (hint) hint.style.display = 'none';
+                }
+            });
+        }
+
+        if (agreeBtn) {
+            agreeBtn.addEventListener('click', function () {
+                if (checkInput) checkInput.checked = true;
+                closeModal();
+            });
+        }
+
+        // ---- Form submit (connected to Flask /register) ----
+        var form = document.getElementById('register-form');
+        var errorBox = document.getElementById('register-error');
+        var submitBtn = form ? form.querySelector('.register-btn') : null;
+
+        function showError(msg) {
+            if (!errorBox) return;
+            errorBox.textContent = msg;
+            errorBox.hidden = false;
+        }
+        function clearError() {
+            if (!errorBox) return;
+            errorBox.textContent = '';
+            errorBox.hidden = true;
+        }
+        function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+        if (form) {
+            form.addEventListener('submit', function (ev) {
+                ev.preventDefault();
+                clearError();
+
+                var name = (form.elements['name'].value || '').trim();
+                var email = (form.elements['email'].value || '').trim();
+                var password = form.elements['password'].value || '';
+                var terms = form.elements['terms'].checked;
+
+                if (!name) return showError('Please enter your full name.');
+                if (!email) return showError('Please enter your email address.');
+                if (!isEmail(email)) return showError('Please enter a valid email address.');
+                if (!password) return showError('Please enter a password.');
+                if (password.length < 8) return showError('Password must be at least 8 characters.');
+                if (!terms) return showError('You must agree to the Terms & Conditions.');
+
+                clearError();
+                if (submitBtn) submitBtn.disabled = true;
+
+                fetch("{{ url_for('register') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, email: email, password: password })
+                })
+                .then(function (res) {
+                    return res.json().then(function (data) { return data; });
+                })
+                .then(function (data) {
+                    if (data.success) {
+                        window.location.href = data.redirect;
+                    } else {
+                        showError(data.message || 'Registration failed. Please try again.');
+                        if (submitBtn) submitBtn.disabled = false;
+                    }
+                })
+                .catch(function () {
+                    showError('Something went wrong. Please try again.');
+                    if (submitBtn) submitBtn.disabled = false;
+                });
+            });
+        }
+    })();
+    </script>
+
+</body>
+</html>

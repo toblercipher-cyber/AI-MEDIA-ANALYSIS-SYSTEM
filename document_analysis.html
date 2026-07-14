@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Analysis — AMAS AI</title>
+    <meta name="description" content="Upload documents and ask AI-powered questions with AMAS Document Analysis.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/results.css">
+    <link rel="stylesheet" href="../static/loader.css">
+    <style>
+        /* ==============================================
+           AMAS AI — Premium Document Analysis UI
+           Figma: AI Chatbot UI (Dark) + Open-claude ref
+           Backend: 100% PRESERVED
+           ============================================== */
+        :root {
+            --sidebar-w: 260px;
+            --bg-deep:   #09090f;
+            --bg-panel:  #111118;
+            --bg-card:   rgba(255,255,255,0.032);
+            --border:    rgba(255,255,255,0.07);
+            --border-hi: rgba(255,255,255,0.14);
+            --accent:    #1DB584;
+            --accent-2:  #00C2FF;
+            --txt:       #EEEEF0;
+            --txt-2:     rgba(255,255,255,0.55);
+            --txt-3:     rgba(255,255,255,0.30);
+            --err-bg:    rgba(255,70,70,0.13);
+            --err-brd:   rgba(255,70,70,0.28);
+            --err-txt:   #FFB3B3;
+            --r-xl: 20px; --r-lg: 14px; --r-md: 10px; --r-sm: 8px;
+            --f-main: 'Inter', sans-serif;
+            --f-disp: 'Space Grotesk', sans-serif;
+            --f-mono: 'JetBrains Mono', monospace;
+            --ease: 0.22s cubic-bezier(0.4,0,0.2,1);
+        }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+        html, body { width:100%; min-height:100vh; background:var(--bg-deep); color:var(--txt); font-family:var(--f-main); overflow-x:hidden; }
+
+        /* ---- Background Canvas (PRESERVED) ---- */
+        #bg-canvas { position:fixed; inset:0; z-index:0; pointer-events:none; width:100%!important; height:100%!important; }
+        .container  { position:fixed; inset:0; z-index:1; width:100%; height:100%; overflow:hidden; pointer-events:none; }
+        #stars,#stars2,#stars3 { position:absolute; width:1px; height:1px; background:transparent; }
+        #stars  { box-shadow:501px 811px rgba(255,255,255,.5),1450px 324px rgba(255,255,255,.4),1093px 780px rgba(255,255,255,.5),469px 678px rgba(255,255,255,.3),904px 241px rgba(255,255,255,.5),1160px 581px rgba(255,255,255,.4),841px 962px rgba(255,255,255,.3),630px 167px rgba(255,255,255,.6),788px 676px rgba(255,255,255,.4),367px 534px rgba(255,255,255,.5),1283px 142px rgba(255,255,255,.6),1062px 378px rgba(255,255,255,.4),1395px 467px rgba(255,255,255,.3),1017px 891px rgba(255,255,255,.5),137px 514px rgba(255,255,255,.4),1767px 403px rgba(255,255,255,.3),1543px 211px rgba(255,255,255,.6),1078px 481px rgba(255,255,255,.5),1189px 574px rgba(255,255,255,.4),1697px 551px rgba(255,255,255,.3),439px 472px rgba(255,255,255,.5),1491px 677px rgba(255,255,255,.4),1364px 599px rgba(255,255,255,.6),34px 382px rgba(255,255,255,.3),1221px 584px rgba(255,255,255,.5),1266px 499px rgba(255,255,255,.4),659px 518px rgba(255,255,255,.6),731px 959px rgba(255,255,255,.3),332px 216px rgba(255,255,255,.4),913px 788px rgba(255,255,255,.5),80px 712px rgba(255,255,255,.3),404px 975px rgba(255,255,255,.6),322px 797px rgba(255,255,255,.4),425px 321px rgba(255,255,255,.5); animation:animStar 60s linear infinite; }
+        #stars2 { width:2px; height:2px; box-shadow:299px 200px rgba(255,255,255,.3),752px 543px rgba(255,255,255,.25),1201px 890px rgba(255,255,255,.35),450px 721px rgba(255,255,255,.25),1654px 432px rgba(255,255,255,.3),830px 165px rgba(255,255,255,.25),1120px 670px rgba(255,255,255,.35),67px 410px rgba(255,255,255,.3); animation:animStar 90s linear infinite; }
+        #stars3 { width:3px; height:3px; box-shadow:700px 300px rgba(255,255,255,.18),1300px 600px rgba(255,255,255,.22),400px 800px rgba(255,255,255,.18),1600px 200px rgba(255,255,255,.22); animation:animStar 150s linear infinite; }
+        @keyframes animStar { from{transform:translateY(0)} to{transform:translateY(-2000px)} }
+
+        /* ---- App Shell ---- */
+        .app-shell { position:relative; z-index:2; display:flex; width:100%; min-height:100vh; }
+
+        /* ---- Sidebar ---- */
+        .sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--bg-panel); border-right:1px solid var(--border); display:flex; flex-direction:column; position:fixed; left:0; top:0; bottom:0; z-index:100; transition:transform var(--ease); overflow:hidden; }
+        .sidebar.collapsed { transform:translateX(calc(-1 * var(--sidebar-w))); }
+        .sidebar-header { padding:20px 18px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+        .sidebar-logo { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; font-family:var(--f-disp); font-size:13px; font-weight:800; color:#fff; flex-shrink:0; }
+        .sidebar-brand { font-family:var(--f-disp); font-size:15px; font-weight:700; color:var(--txt); letter-spacing:-.01em; }
+        .sidebar-brand span { color:var(--accent); }
+        .sidebar-nav { flex:1; padding:12px 10px; overflow-y:auto; }
+        .sidebar-sec-lbl { font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--txt-3); padding:8px 8px 4px; margin-top:8px; }
+        .sidebar-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:var(--r-sm); font-size:13.5px; font-weight:500; color:var(--txt-2); cursor:pointer; text-decoration:none; transition:background var(--ease),color var(--ease); margin-bottom:2px; }
+        .sidebar-item:hover { background:rgba(255,255,255,.05); color:var(--txt); }
+        .sidebar-item.active { background:rgba(29,181,132,.12); color:var(--accent); }
+        .sidebar-item svg { width:16px; height:16px; flex-shrink:0; opacity:.8; }
+        .sidebar-item.active svg { opacity:1; }
+        .sidebar-footer { padding:14px 12px; border-top:1px solid var(--border); }
+        .sidebar-user { display:flex; align-items:center; gap:10px; padding:8px; border-radius:var(--r-md); cursor:pointer; transition:background var(--ease); }
+        .sidebar-user:hover { background:rgba(255,255,255,.05); }
+        .user-avatar { width:30px; height:30px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+        .user-name { font-size:13px; font-weight:600; color:var(--txt); }
+        .user-plan { font-size:11px; color:var(--txt-3); }
+
+        /* ---- Main Content ---- */
+        .main-content { flex:1; margin-left:var(--sidebar-w); min-height:100vh; display:flex; flex-direction:column; transition:margin-left var(--ease); }
+        .main-content.expanded { margin-left:0; }
+
+        /* ---- Topbar ---- */
+        .topbar { position:sticky; top:0; z-index:50; background:rgba(9,9,15,.88); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border-bottom:1px solid var(--border); padding:12px 24px; display:flex; align-items:center; justify-content:space-between; }
+        .topbar-left { display:flex; align-items:center; gap:14px; }
+        .sidebar-toggle { width:34px; height:34px; border-radius:var(--r-sm); background:var(--bg-card); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--txt-2); transition:all var(--ease); }
+        .sidebar-toggle:hover { background:rgba(255,255,255,.08); color:var(--txt); }
+        .topbar-title { font-family:var(--f-disp); font-size:15px; font-weight:600; color:var(--txt); display:flex; align-items:center; gap:8px; }
+        .topbar-badge { font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff; letter-spacing:.04em; }
+        .topbar-right { display:flex; align-items:center; gap:10px; }
+        .topbar-btn { display:flex; align-items:center; gap:6px; padding:7px 14px; border-radius:var(--r-md); background:var(--bg-card); border:1px solid var(--border); color:var(--txt-2); font-size:13px; font-weight:500; cursor:pointer; transition:all var(--ease); font-family:var(--f-main); }
+        .topbar-btn:hover { background:rgba(255,255,255,.07); color:var(--txt); border-color:var(--border-hi); }
+
+        /* ---- Page Body ---- */
+        .page-body { flex:1; display:flex; flex-direction:column; align-items:center; padding:0 24px 52px; max-width:860px; margin:0 auto; width:100%; }
+
+        /* ---- Hero ---- */
+        .hero-section { display:flex; flex-direction:column; align-items:center; padding:52px 0 38px; text-align:center; }
+        .hero-orb { width:72px; height:72px; border-radius:50%; background:radial-gradient(circle at 40% 35%,#3ef0c0 0%,#1DB584 40%,#0c6b4a 80%,#061f15 100%); box-shadow:0 0 0 12px rgba(29,181,132,.08),0 0 40px rgba(29,181,132,.35),0 0 80px rgba(29,181,132,.15),inset 0 -8px 16px rgba(0,0,0,.4); margin-bottom:24px; animation:orbPulse 4s ease-in-out infinite; position:relative; }
+        .hero-orb::after { content:''; position:absolute; top:20%; left:22%; width:28%; height:20%; background:rgba(255,255,255,.35); border-radius:50%; filter:blur(3px); transform:rotate(-30deg); }
+        @keyframes orbPulse { 0%,100%{box-shadow:0 0 0 12px rgba(29,181,132,.08),0 0 40px rgba(29,181,132,.35),0 0 80px rgba(29,181,132,.15),inset 0 -8px 16px rgba(0,0,0,.4)} 50%{box-shadow:0 0 0 18px rgba(29,181,132,.06),0 0 60px rgba(29,181,132,.45),0 0 100px rgba(29,181,132,.20),inset 0 -8px 16px rgba(0,0,0,.4)} }
+        .hero-title { font-family:var(--f-disp); font-size:clamp(26px,4vw,34px); font-weight:800; color:var(--txt); letter-spacing:-.02em; margin-bottom:10px; line-height:1.2; }
+        .hero-subtitle { font-size:14.5px; color:var(--txt-2); line-height:1.65; max-width:440px; }
+
+        /* ---- Loader (PRESERVED structure) ---- */
+        .loader-wrapper { position:relative; display:none; align-items:center; justify-content:center; width:180px; height:180px; font-family:var(--f-main); font-size:1em; font-weight:400; color:rgba(255,255,255,.85); border-radius:50%; user-select:none; margin:0 auto 2.5rem; letter-spacing:.02em; }
+        .loader-wrapper.visible { display:flex; }
+        .loader { position:absolute; top:0; left:0; width:100%; aspect-ratio:1/1; border-radius:50%; animation:loader-rotate 2s linear infinite; z-index:0; }
+        @keyframes loader-rotate { 0%{transform:rotate(90deg);box-shadow:0 10px 20px 0 #fff inset,0 20px 30px 0 #1DB584 inset,0 60px 60px 0 #0a5c3a inset} 50%{transform:rotate(270deg);box-shadow:0 10px 20px 0 #fff inset,0 20px 10px 0 #00C2FF inset,0 40px 60px 0 #004466 inset} 100%{transform:rotate(450deg);box-shadow:0 10px 20px 0 #fff inset,0 20px 30px 0 #1DB584 inset,0 60px 60px 0 #0a5c3a inset} }
+        .loader-letter { display:inline-block; opacity:.4; animation:loader-letter-anim 2s infinite; z-index:1; }
+        .loader-letter:nth-child(1){animation-delay:0s} .loader-letter:nth-child(2){animation-delay:.1s} .loader-letter:nth-child(3){animation-delay:.2s} .loader-letter:nth-child(4){animation-delay:.3s} .loader-letter:nth-child(5){animation-delay:.4s} .loader-letter:nth-child(6){animation-delay:.5s} .loader-letter:nth-child(7){animation-delay:.6s} .loader-letter:nth-child(8){animation-delay:.7s} .loader-letter:nth-child(9){animation-delay:.8s} .loader-letter:nth-child(10){animation-delay:.9s}
+        @keyframes loader-letter-anim { 0%,100%{opacity:.4;transform:translateY(0)} 20%{opacity:1;transform:scale(1.15)} 40%{opacity:.7;transform:translateY(0)} }
+        @media(prefers-reduced-motion:reduce){.loader,.loader-letter{animation:none}}
+
+        /* ---- Form ---- */
+        .qa-stage,.qa-form { width:100%; }
+        .qa-bar { display:flex; flex-direction:column; gap:0; }
+        .qa-toolbar { display:none; } /* PRESERVED in DOM, hidden visually */
+        .upload-panel { display:flex; flex-direction:column; gap:12px; margin-bottom:12px; }
+
+        /* ---- Upload Cards ---- */
+        .upload-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-xl); padding:20px 22px; transition:border-color var(--ease),box-shadow var(--ease),background var(--ease); position:relative; overflow:hidden; }
+        .upload-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(29,181,132,.4),transparent); opacity:0; transition:opacity var(--ease); }
+        .upload-card:hover::before,.upload-card:focus-within::before { opacity:1; }
+        .upload-card:hover,.upload-card:focus-within { border-color:rgba(29,181,132,.25); background:rgba(255,255,255,.044); box-shadow:0 0 0 1px rgba(29,181,132,.07),0 8px 32px rgba(0,0,0,.28); }
+        .upload-label { display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:11.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--txt-3); }
+        .upload-label svg { width:14px; height:14px; color:var(--accent); }
+
+        /* ---- Drop Zone ---- */
+        .drop-zone { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:28px 20px; border-radius:var(--r-lg); border:1.5px dashed rgba(255,255,255,.11); background:rgba(255,255,255,.018); text-align:center; cursor:pointer; transition:all var(--ease); position:relative; }
+        .drop-zone.drag-over { border-color:var(--accent); background:rgba(29,181,132,.06); box-shadow:0 0 20px rgba(29,181,132,.1); }
+        .drop-zone.has-file { border-color:rgba(29,181,132,.38); background:rgba(29,181,132,.045); }
+        .drop-icon { width:40px; height:40px; border-radius:10px; background:rgba(29,181,132,.1); border:1px solid rgba(29,181,132,.2); display:flex; align-items:center; justify-content:center; color:var(--accent); transition:transform var(--ease),box-shadow var(--ease); }
+        .drop-zone:hover .drop-icon,.drop-zone.drag-over .drop-icon { transform:translateY(-3px) scale(1.08); box-shadow:0 8px 20px rgba(29,181,132,.2); }
+        .drop-primary { font-size:14px; font-weight:600; color:var(--txt); }
+        .drop-primary span { color:var(--accent); text-decoration:underline; text-decoration-color:rgba(29,181,132,.4); }
+        .drop-secondary { font-size:12px; color:var(--txt-3); }
+        .file-badge { display:none; align-items:center; gap:8px; font-size:13px; font-weight:500; color:var(--accent); font-family:var(--f-mono); padding:6px 12px; background:rgba(29,181,132,.08); border-radius:8px; border:1px solid rgba(29,181,132,.2); margin-top:10px; word-break:break-all; }
+        .file-badge.show { display:flex; }
+
+        /* PRESERVED: id="file" hidden behind drop zone */
+        .upload-input { position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:5; }
+
+        /* ---- Question Textarea ---- */
+        .question-wrapper { position:relative; }
+        /* PRESERVED: id="question" name="question" */
+        .upload-question { width:100%; padding:14px 16px; border-radius:var(--r-lg); border:1px solid transparent; background:rgba(255,255,255,.04); color:var(--txt); outline:none; font-family:var(--f-main); font-size:14.5px; line-height:1.65; resize:vertical; min-height:110px; transition:border-color var(--ease),box-shadow var(--ease),background var(--ease); }
+        .upload-question:focus { border-color:rgba(29,181,132,.35); background:rgba(255,255,255,.06); box-shadow:0 0 0 3px rgba(29,181,132,.07); }
+        .upload-question::placeholder { color:var(--txt-3); font-style:italic; }
+        .char-count { position:absolute; bottom:10px; right:14px; font-size:11px; color:var(--txt-3); font-family:var(--f-mono); pointer-events:none; }
+
+        /* ---- Submit Row ---- */
+        .submit-row { display:flex; justify-content:flex-end; margin-top:6px; }
+        /* PRESERVED: class="qa-submit" type="submit" */
+        .qa-submit { display:inline-flex; align-items:center; gap:9px; padding:13px 28px; border-radius:50px; background:linear-gradient(135deg,#1DB584 0%,#16a374 40%,#00C2FF 100%); border:none; cursor:pointer; color:#fff; font-family:var(--f-disp); font-size:14px; font-weight:700; letter-spacing:.02em; transition:all .28s cubic-bezier(.4,0,.2,1); box-shadow:0 4px 20px rgba(29,181,132,.35); position:relative; overflow:hidden; }
+        .qa-submit::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.15),transparent); opacity:0; transition:opacity .2s; }
+        .qa-submit:hover { transform:translateY(-2px) scale(1.02); box-shadow:0 8px 30px rgba(29,181,132,.5); }
+        .qa-submit:hover::before { opacity:1; }
+        .qa-submit:active { transform:translateY(0) scale(.98); }
+        .qa-submit:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+        .submit-spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .75s linear infinite; display:none; }
+        .qa-submit.submitting .submit-spinner { display:block; }
+        .qa-submit.submitting .submit-lbl,.qa-submit.submitting .submit-ico { display:none; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        /* PRESERVED: .loading state */
+        .loading { opacity:.65; pointer-events:none; }
+
+        /* PRESERVED: id="error-box" class="error-box" .show */
+        .error-box { margin-top:14px; padding:14px 18px; border-radius:var(--r-lg); background:var(--err-bg); border:1px solid var(--err-brd); color:var(--err-txt); display:none; font-size:14px; line-height:1.55; align-items:center; gap:10px; }
+        .error-box.show { display:flex; }
+        .error-icon { flex-shrink:0; width:18px; height:18px; }
+
+        /* PRESERVED: id="result-panel" class="result-panel" .show */
+        .result-panel { margin-top:28px; display:none; flex-direction:column; animation:slideUp .4s cubic-bezier(.4,0,.2,1); }
+        .result-panel.show { display:flex; }
+        @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        .result-panel-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:18px 22px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--r-xl) var(--r-xl) 0 0; }
+        .result-panel-title-group { display:flex; align-items:center; gap:10px; }
+        /* PRESERVED: class="result-title" */
+        .result-title { font-family:var(--f-disp); font-size:16px; font-weight:700; color:var(--txt); margin:0; }
+        .result-ai-badge { font-size:10px; font-weight:700; padding:2px 7px; border-radius:20px; background:rgba(29,181,132,.14); border:1px solid rgba(29,181,132,.28); color:var(--accent); letter-spacing:.06em; }
+        /* PRESERVED: id="status-text" class="result-status" */
+        .result-status { font-family:var(--f-mono); font-size:12px; color:var(--txt-3); display:flex; align-items:center; gap:6px; }
+        .status-dot { width:7px; height:7px; border-radius:50%; background:var(--txt-3); animation:dotPulse 2s ease-in-out infinite; display:inline-block; flex-shrink:0; }
+        .status-dot.success { background:var(--accent); }
+        .status-dot.error   { background:#FF6B6B; }
+        .status-dot.loading { background:var(--accent-2); box-shadow:0 0 6px rgba(0,194,255,.5); }
+        @keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+        .result-panel-body { padding:20px 22px; background:rgba(9,9,15,.65); border:1px solid var(--border); border-top:none; border-radius:0 0 var(--r-xl) var(--r-xl); }
+        /* PRESERVED: class="result-card" */
+        .result-card { padding:18px 20px; border-radius:var(--r-lg); background:var(--bg-card); border:1px solid var(--border); margin-bottom:12px; transition:border-color var(--ease); }
+        .result-card:last-child { margin-bottom:0; }
+        .result-card:hover { border-color:var(--border-hi); }
+        /* PRESERVED: class="result-label" */
+        .result-label { display:flex; align-items:center; gap:7px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--txt-3); margin-bottom:10px; }
+        .result-label-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+        /* PRESERVED: id="result-answer" class="result-value" */
+        .result-value { font-size:14.5px; line-height:1.72; color:var(--txt); white-space:pre-wrap; word-break:break-word; }
+
+        /* ---- Response Sub-cards ---- */
+        .resp-card { display:grid; gap:12px; }
+        .resp-sub { padding:14px 16px; border-radius:12px; background:rgba(255,255,255,.026); border:1px solid rgba(255,255,255,.055); transition:border-color var(--ease); }
+        .resp-sub:hover { border-color:rgba(255,255,255,.1); }
+        .resp-sub-lbl { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700; color:var(--txt-3); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+        .resp-sub-lbl::before { content:''; display:inline-block; width:5px; height:5px; border-radius:50%; background:#00C2FF; }
+        .resp-sub-lbl.intro::before { background:#1DB584; }
+        .resp-sub-txt { font-size:14.5px; line-height:1.72; color:#e8e8ec; white-space:pre-wrap; word-break:break-word; }
+
+        /* ---- Sidebar Overlay (mobile) ---- */
+        .sidebar-overlay { display:none; position:fixed; inset:0; z-index:99; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity var(--ease); }
+        .sidebar-overlay.visible { opacity:1; pointer-events:auto; }
+
+        /* ---- Responsive ---- */
+        @media(max-width:768px){
+            .sidebar { transform:translateX(calc(-1 * var(--sidebar-w))); }
+            .sidebar.open { transform:translateX(0); }
+            .main-content { margin-left:0 !important; }
+            .page-body { padding:0 16px 40px; }
+            .topbar { padding:10px 16px; }
+            .hero-section { padding:36px 0 28px; }
+            .sidebar-overlay { display:block; }
+        }
+        @media(max-width:500px){
+            .topbar-btn span { display:none; }
+            .topbar-btn { padding:7px; }
+            .qa-submit { padding:12px 20px; font-size:13px; }
+        }
+
+        /* ---- Scrollbar ---- */
+        ::-webkit-scrollbar { width:6px; }
+        ::-webkit-scrollbar-track { background:transparent; }
+        ::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1); border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,.18); }
+    </style>
+</head>
+<body>
+
+    <!-- PRESERVED: background canvas + stars -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="container">
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="app-shell">
+
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="sidebar" id="sidebar" aria-label="Application sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo" aria-hidden="true">A</div>
+                <span class="sidebar-brand">AMAS<span>AI</span></span>
+            </div>
+            <nav class="sidebar-nav" aria-label="Main navigation">
+                <div class="sidebar-sec-lbl">Main</div>
+                <a href="#" class="sidebar-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    My Models
+                </a>
+                <a href="#" class="sidebar-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Vacations
+                </a>
+                <a href="#" class="sidebar-item active" aria-current="page">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    Document Analysis
+                </a>
+                <a href="#" class="sidebar-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    History
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="sidebar-user" role="button" tabindex="0" aria-label="User profile">
+                    <div class="user-avatar" aria-hidden="true">U</div>
+                    <div>
+                        <div class="user-name">User</div>
+                        <div class="user-plan">Free Plan</div>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-left:auto;color:var(--txt-3)"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ============ MAIN ============ -->
+        <div class="main-content" id="main-content">
+
+            <header class="topbar" role="banner">
+                <div class="topbar-left">
+                    <button class="sidebar-toggle" id="sidebar-toggle-btn" aria-label="Toggle sidebar" aria-expanded="true" aria-controls="sidebar" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    </button>
+                    <div class="topbar-title">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--txt-3)"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        Document Analysis
+                        <span class="topbar-badge">AI</span>
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <button class="topbar-btn" type="button" aria-label="Settings">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span>Settings</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="page-body" id="page-body" role="main">
+
+                <!-- Hero -->
+                <section class="hero-section" aria-label="Welcome">
+                    <div class="hero-orb" role="img" aria-label="AMAS AI"></div>
+                    <h1 class="hero-title">Document Analysis</h1>
+                    <p class="hero-subtitle">Upload any document and ask questions. AMAS AI will analyze the content and provide detailed, structured answers instantly.</p>
+                </section>
+
+                <!-- PRESERVED: id="reveal" -->
+                <section class="qa-stage" id="reveal" aria-label="Document analysis form">
+
+                    <!-- PRESERVED: loader-wrapper structure -->
+                    <div class="loader-wrapper" role="status" aria-live="polite" aria-label="Generating" id="loader-wrapper">
+                        <span class="loader-letter">G</span><span class="loader-letter">e</span><span class="loader-letter">n</span><span class="loader-letter">e</span><span class="loader-letter">r</span><span class="loader-letter">a</span><span class="loader-letter">t</span><span class="loader-letter">i</span><span class="loader-letter">n</span><span class="loader-letter">g</span>
+                        <div class="loader" aria-hidden="true"></div>
+                    </div>
+
+                    <!-- PRESERVED: id="qa-form" enctype="multipart/form-data" -->
+                    <form class="qa-form" id="qa-form" autocomplete="off" enctype="multipart/form-data">
+                        <!-- PRESERVED: class="qa-bar" -->
+                        <div class="qa-bar">
+
+                            <!-- PRESERVED: qa-toolbar (in DOM, hidden) -->
+                            <div class="qa-toolbar" aria-hidden="true">
+                                <button class="qa-add" type="button" aria-label="Add attachment">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                                    <span>Add</span>
+                                </button>
+                            </div>
+
+                            <div class="upload-panel">
+
+                                <!-- File card -->
+                                <div class="upload-card">
+                                    <!-- PRESERVED: for="file" -->
+                                    <label class="upload-label" for="file">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        Upload Document
+                                    </label>
+                                    <div class="drop-zone" id="drop-zone" role="button" tabindex="0" aria-label="Click or drag file here">
+                                        <!-- PRESERVED: id="file" name="file" -->
+                                        <input type="file" id="file" name="file" class="upload-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt" required aria-label="Choose document">
+                                        <div class="drop-icon" aria-hidden="true">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                        </div>
+                                        <div class="drop-primary">Drop your file here, or <span id="browse-trigger">browse</span></div>
+                                        <div class="drop-secondary">PDF, DOC, DOCX, PPT, PPTX, TXT</div>
+                                    </div>
+                                    <div class="file-badge" id="file-name-display" role="status" aria-live="polite">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                        <span id="file-name-text"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Question card -->
+                                <div class="upload-card">
+                                    <!-- PRESERVED: for="question" -->
+                                    <label class="upload-label" for="question">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                        Your Question
+                                    </label>
+                                    <div class="question-wrapper">
+                                        <!-- PRESERVED: id="question" name="question" -->
+                                        <textarea id="question" name="question" class="upload-question" placeholder="Ask anything about the document..." rows="5" required aria-label="Enter your question" maxlength="2000"></textarea>
+                                        <div class="char-count" id="char-count" aria-hidden="true">0 / 2000</div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="submit-row">
+                                <!-- PRESERVED: class="qa-submit" type="submit" -->
+                                <button type="submit" class="qa-submit" id="qa-submit-btn" aria-label="Analyze document">
+                                    <svg class="submit-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+                                    <span class="submit-lbl">|Press|</span>
+                                    <div class="submit-spinner" aria-hidden="true"></div>
+                                </button>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <!-- PRESERVED: id="error-box" class="error-box" .show -->
+                    <div id="error-box" class="error-box" role="alert" aria-live="assertive">
+                        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span id="error-msg-text"></span>
+                    </div>
+
+                    <!-- PRESERVED: id="result-panel" class="result-panel" .show -->
+                    <section id="result-panel" class="result-panel" aria-label="Analysis results" aria-live="polite">
+                        <div class="result-panel-head">
+                            <div class="result-panel-title-group">
+                                <!-- PRESERVED: class="result-title" -->
+                                <h2 class="result-title">Document Result</h2>
+                                <span class="result-ai-badge">AMAS AI</span>
+                            </div>
+                            <!-- PRESERVED: id="status-text" class="result-status" -->
+                            <p class="result-status" id="status-text">
+                                <span class="status-dot"></span>
+                                Waiting for your input.
+                            </p>
+                        </div>
+                        <div class="result-panel-body">
+                            <!-- PRESERVED: class="result-card" -->
+                            <div class="result-card">
+                                <!-- PRESERVED: class="result-label" -->
+                                <div class="result-label">
+                                    <span class="result-label-dot"></span>
+                                    Answer
+                                </div>
+                                <!-- PRESERVED: id="result-answer" class="result-value" -->
+                                <div class="result-value" id="result-answer"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- PRESERVED: Three.js + GSAP + script.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="../static/script.js"></script>
+
+    <script>
+        /* =====================================================
+           AMAS AI — Inline JS
+           PRESERVED: fetch("/document-analysis") POST,
+           credentials:'include', FormData file+question,
+           data.result.answer, renderStructuredResponse,
+           escapeHTML, error-box, result-panel, status-text,
+           result-answer, qa-form, .loading, .show
+           ===================================================== */
+
+        const form          = document.getElementById("qa-form");
+        const errorBox      = document.getElementById("error-box");
+        const resultPanel   = document.getElementById("result-panel");
+        const statusText    = document.getElementById("status-text");
+        const resultAnswer  = document.getElementById("result-answer");
+        const submitBtn     = document.getElementById("qa-submit-btn");
+        const loaderWrapper = document.getElementById("loader-wrapper");
+        const fileInput     = document.getElementById("file");
+        const questionInput = document.getElementById("question");
+        const dropZone      = document.getElementById("drop-zone");
+        const fileNameDisp  = document.getElementById("file-name-display");
+        const fileNameText  = document.getElementById("file-name-text");
+        const charCountEl   = document.getElementById("char-count");
+        const sidebarBtn    = document.getElementById("sidebar-toggle-btn");
+        const sidebar       = document.getElementById("sidebar");
+        const mainContent   = document.getElementById("main-content");
+        const overlay       = document.getElementById("sidebar-overlay");
+
+        /* ---- Sidebar ---- */
+        let sidebarOpen = window.innerWidth > 768;
+        function setSidebar(open) {
+            sidebarOpen = open;
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle("open", open);
+                overlay.classList.toggle("visible", open);
+            } else {
+                sidebar.classList.toggle("collapsed", !open);
+                mainContent.classList.toggle("expanded", !open);
+                overlay.classList.remove("visible");
+            }
+            sidebarBtn.setAttribute("aria-expanded", String(open));
+        }
+        sidebarBtn.addEventListener("click", () => setSidebar(!sidebarOpen));
+        overlay.addEventListener("click",    () => setSidebar(false));
+        window.addEventListener("resize",    () => { if (window.innerWidth > 768) overlay.classList.remove("visible"); });
+
+        /* ---- Char Count ---- */
+        questionInput.addEventListener("input", () => {
+            const n = questionInput.value.length;
+            charCountEl.textContent = n + " / 2000";
+            charCountEl.style.color = n > 1800 ? "#FF6B6B" : "";
+        });
+
+        /* ---- Drag & Drop ---- */
+        dropZone.addEventListener("dragover",  e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+        dropZone.addEventListener("dragleave", e => { e.preventDefault(); dropZone.classList.remove("drag-over"); });
+        dropZone.addEventListener("drop", e => {
+            e.preventDefault(); dropZone.classList.remove("drag-over");
+            if (e.dataTransfer.files && e.dataTransfer.files.length) {
+                const dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                fileInput.files = dt.files;
+                showFile(e.dataTransfer.files[0].name);
+            }
+        });
+        dropZone.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") fileInput.click(); });
+        document.getElementById("browse-trigger").addEventListener("click", e => { e.stopPropagation(); fileInput.click(); });
+        fileInput.addEventListener("change", () => { if (fileInput.files[0]) showFile(fileInput.files[0].name); });
+        function showFile(name) {
+            dropZone.classList.add("has-file");
+            fileNameText.textContent = name;
+            fileNameDisp.classList.add("show");
+        }
+
+        /* ---- Status dot helper ---- */
+        function setStatus(text, state) {
+            statusText.innerHTML = "";
+            const dot = document.createElement("span");
+            dot.className = "status-dot" + (state ? " " + state : "");
+            statusText.appendChild(dot);
+            statusText.appendChild(document.createTextNode(" " + text));
+        }
+
+        /* ---- PRESERVED: showError / clearError ---- */
+        function showError(message) {
+            errorBox.innerHTML = "";
+            const icon = `<svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+            errorBox.innerHTML = icon + `<span>${message}</span>`;
+            errorBox.classList.add("show");
+        }
+        function clearError() {
+            errorBox.innerHTML = "";
+            errorBox.classList.remove("show");
+        }
+
+        /* ---- PRESERVED: renderStructuredResponse ---- */
+        function renderStructuredResponse(value) {
+            if (!value) return "<p style='color:var(--txt-3)'>No data available.</p>";
+            if (typeof value === "object" && value.introduction && value.detailed_response) {
+                return `<div class='resp-card'>
+                    <div class='resp-sub'>
+                        <div class='resp-sub-lbl intro'>Introduction</div>
+                        <div class='resp-sub-txt'>${escapeHTML(value.introduction)}</div>
+                    </div>
+                    <div class='resp-sub'>
+                        <div class='resp-sub-lbl'>Detailed Response</div>
+                        <div class='resp-sub-txt'>${escapeHTML(value.detailed_response)}</div>
+                    </div>
+                </div>`;
+            }
+            return `<pre style="font-family:var(--f-mono);font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-all">${escapeHTML(JSON.stringify(value, null, 2))}</pre>`;
+        }
+
+        /* ---- PRESERVED: escapeHTML ---- */
+        function escapeHTML(text) {
+            const map = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' };
+            return String(text).replace(/[&<>"']/g, m => map[m]);
+        }
+
+        /* ---- PRESERVED: form submit — ALL backend logic untouched ---- */
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            clearError();
+
+            const bar = form.querySelector(".qa-bar"); /* PRESERVED */
+
+            /* PRESERVED: validation */
+            if (!fileInput.files.length) { showError("Please upload a document."); return; }
+            if (!questionInput.value.trim()) { showError("Please enter a question."); return; }
+
+            try {
+                bar.classList.add("loading");         /* PRESERVED */
+                submitBtn.disabled = true;
+                submitBtn.classList.add("submitting");
+                loaderWrapper.classList.add("visible");
+
+                setStatus("Processing... please wait.", "loading");
+                resultPanel.classList.add("show");    /* PRESERVED */
+                resultAnswer.innerHTML = "<span style='color:var(--txt-3);font-style:italic'>Analyzing your document...</span>";
+
+                /* PRESERVED: FormData with file + question */
+                const formData = new FormData();
+                formData.append("file", fileInput.files[0]);           /* PRESERVED */
+                formData.append("question", questionInput.value.trim()); /* PRESERVED */
+
+                /* PRESERVED: fetch /document-analysis POST credentials:'include' */
+                const response = await fetch("/document-analysis", {
+                    method: "POST",
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                /* PRESERVED: content-type check */
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Session expired. Please login again.");
+                }
+
+                /* PRESERVED: json parse */
+                const data = await response.json();
+
+                /* PRESERVED: success check */
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || "Something went wrong.");
+                }
+
+                /* PRESERVED: data.result.answer rendering */
+                resultAnswer.innerHTML = renderStructuredResponse(data.result.answer);
+                setStatus("Analysis completed successfully.", "success");
+
+            } catch (err) {
+                /* PRESERVED: error handling */
+                resultPanel.classList.add("show");
+                setStatus("Processing failed.", "error");
+                showError(err.message || "Unexpected error.");
+                resultAnswer.innerHTML = "";
+            } finally {
+                /* PRESERVED: cleanup */
+                bar.classList.remove("loading");
+                submitBtn.disabled = false;
+                submitBtn.classList.remove("submitting");
+                loaderWrapper.classList.remove("visible");
+            }
+        });
+    </script>
+
+</body>
+</html>

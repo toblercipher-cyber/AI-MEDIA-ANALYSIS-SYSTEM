@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Media Analysis System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/style.css">
+
+    <!-- ============================================
+         NAVBAR — inline styles (no separate file)
+         Logo path: ../static/logo.png
+         (replace with the file from C:\Users\Admin\Downloads\LOGO)
+         ============================================ -->
+    <style>
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            width: 100%;
+            background: rgba(2, 2, 2, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .navbar-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+            padding: 0 1.5rem;
+            max-width: 1500px;
+            margin: 0 auto;
+            gap: 1.5rem;
+        }
+
+        /* ---- Logo (leftmost) ---- */
+        .navbar-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .navbar-logo-img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px;
+        }
+
+        .navbar-logo-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        /* ---- Nav (center / right) — 6 small buttons with gap ---- */
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.95rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-btn.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-btn-ghost {
+            color: rgba(255, 255, 255, 0.6);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .nav-btn-ghost:hover {
+            border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        .nav-btn-accent {
+            background: #00C2FF;
+            color: #000000;
+            border-color: #00C2FF;
+            box-shadow: 0 0 16px rgba(0, 194, 255, 0.25);
+        }
+
+        .nav-btn-accent:hover {
+            background: #19ccff;
+            color: #000000;
+            box-shadow: 0 0 24px rgba(0, 194, 255, 0.45);
+        }
+
+        /* ---- Mobile toggle (hamburger) ---- */
+        .navbar-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .navbar-toggle span {
+            display: block;
+            width: 18px;
+            height: 1.5px;
+            background: #ffffff;
+            border-radius: 2px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            transform-origin: center;
+        }
+
+        .navbar-toggle.is-open span:nth-child(1) {
+            transform: translateY(5.5px) rotate(45deg);
+        }
+        .navbar-toggle.is-open span:nth-child(2) {
+            opacity: 0;
+        }
+        .navbar-toggle.is-open span:nth-child(3) {
+            transform: translateY(-5.5px) rotate(-45deg);
+        }
+
+        /* ---- Mobile menu (hidden by default) ---- */
+        .navbar-mobile {
+            display: none;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(2, 2, 2, 0.95);
+        }
+
+        .navbar-mobile.is-open {
+            display: flex;
+        }
+
+        .navbar-mobile .nav-btn {
+            width: 100%;
+            justify-content: flex-start;
+            padding: 0.7rem 1rem;
+        }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 900px) {
+            .navbar-nav {
+                display: none;
+            }
+            .navbar-toggle {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-inner {
+                padding: 0 1rem;
+                height: 64px;
+            }
+            .navbar-logo-text {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- ─── NAVBAR ─────────────────────────────────────────────────── -->
+    <header class="navbar" id="navbar">
+        <div class="navbar-inner">
+
+            <!-- ✅ CHANGE 1: Logo now points to Flask index route -->
+            <a href="{{ url_for('index') }}" class="navbar-logo" aria-label="AMAS home">
+                <img
+                    src="../static/logo.png"
+                    alt="AMAS logo"
+                    class="navbar-logo-img"
+                    onerror="this.style.display='none'"
+                >
+                <span class="navbar-logo-text">AMAS</span>
+            </a>
+
+            <!-- Desktop nav -->
+            <nav class="navbar-nav" aria-label="Main">
+                <a href="{{ url_for('index') }}" class="nav-btn active">Home</a>
+                <a href="#features" class="nav-btn">Features</a>
+                <a href="#pricing" class="nav-btn">Pricing</a>
+                <a href="#about" class="nav-btn">About</a>
+                <!-- ✅ CHANGE 2 & 3: Sign In / Get Started now use Flask url_for -->
+                <a href="{{ url_for('login') }}" class="nav-btn nav-btn-ghost">Sign In</a>
+                <a href="{{ url_for('login') }}" class="nav-btn nav-btn-accent">Get Started</a>
+            </nav>
+
+            <!-- Mobile toggle -->
+            <button
+                class="navbar-toggle"
+                id="navbarToggle"
+                type="button"
+                aria-label="Toggle navigation menu"
+                aria-expanded="false"
+                aria-controls="navbarMobile"
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="navbar-mobile" id="navbarMobile">
+            <a href="{{ url_for('index') }}" class="nav-btn active">Home</a>
+            <a href="#features" class="nav-btn">Features</a>
+            <a href="#pricing" class="nav-btn">Pricing</a>
+            <a href="#about" class="nav-btn">About</a>
+            <!-- ✅ CHANGE 4 & 5: Mobile Sign In / Get Started now use Flask url_for -->
+            <a href="{{ url_for('login') }}" class="nav-btn nav-btn-ghost">Sign In</a>
+            <a href="{{ url_for('login') }}" class="nav-btn nav-btn-accent">Get Started</a>
+        </div>
+    </header>
+
+    <!-- ─── HERO ─────────────────────────────────────────────────── -->
+    <section class="hero">
+        <div class="hero-inner" id="reveal">
+            <div class="hero-left">
+                <div class="brand">
+                    <div class="brand-dot">
+                        <div class="brand-ping"></div>
+                    </div>
+                    <span class="brand-label">AMAS // AI MEDIA ANALYSIS SYSTEM</span>
+                </div>
+
+                <div class="title-block">
+                    <h1 class="hero-title">
+                        ANALYZE<br>
+                        <span class="title-outline">EVERYTHING</span>
+                    </h1>
+                    <p class="hero-sub">
+                        Transcribe videos, summarize documents,<br>
+                        extract insights — powered by Whisper & Mistral AI.
+                    </p>
+                </div>
+
+                <!-- ✅ CHANGE 6: CTA button onclick now uses Flask url_for -->
+                <button class="hover-btn" id="cta-btn" onclick="window.location.href='{{ url_for('login') }}'">
+                    <span class="btn-arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 17L17 7M17 7H8M17 7V16"/>
+                        </svg>
+                    </span>
+                    <span>Get Started</span>
+                </button>
+            </div>
+
+            <div class="hero-right">
+                <div class="stat-card command-cell">
+                    <span class="card-label">001 // STATUS</span>
+                    <div class="card-row">
+                        <h4 class="card-value">Active</h4>
+                        <div class="progress-track">
+                            <div class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card command-cell">
+                    <span class="card-label">002 // POWERED BY</span>
+                    <div class="card-stats">
+                        <div class="stat-row">
+                            <span>Whisper AI</span>
+                            <span class="stat-tag">Transcription</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-row">
+                            <span>Mistral AI</span>
+                            <span class="stat-tag">Analysis</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-row">
+                            <span>ChromaDB</span>
+                            <span class="stat-tag">Vector RAG</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card command-cell">
+                    <span class="card-label">003 // SUPPORTS</span>
+                    <h3 class="card-text">
+                        YouTube • PDF • Word<br>
+                        PowerPoint • <em>Text files</em>
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── PRICING ───────────────────────────────────────────────── -->
+    <section class="pricing" id="pricing">
+        <div class="pricing-inner">
+
+            <div class="pricing-header">
+                <div class="pricing-eyebrow">
+                    <span class="pricing-eyebrow-dot"></span>
+                    <span class="pricing-eyebrow-label">004 // PRICING</span>
+                </div>
+                <h2 class="pricing-title">
+                    SIMPLE<br>
+                    <span class="pricing-title-outline">PRICING</span>
+                </h2>
+                <p class="pricing-sub">
+                    One plan. Every feature. No hidden fees —<br>
+                    pick the cadence that works for you.
+                </p>
+            </div>
+
+            <div class="pricing-stage">
+
+                <div class="pricing-grid-bg" aria-hidden="true"></div>
+
+                <div class="pricing-cards">
+
+                    <svg class="plus-corner plus-tl" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <line x1="9" y1="0" x2="9" y2="18" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                        <line x1="0" y1="9" x2="18" y2="9" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                    </svg>
+                    <svg class="plus-corner plus-tr" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <line x1="9" y1="0" x2="9" y2="18" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                        <line x1="0" y1="9" x2="18" y2="9" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                    </svg>
+                    <svg class="plus-corner plus-bl" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <line x1="9" y1="0" x2="9" y2="18" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                        <line x1="0" y1="9" x2="18" y2="9" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                    </svg>
+                    <svg class="plus-corner plus-br" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                        <line x1="9" y1="0" x2="9" y2="18" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                        <line x1="0" y1="9" x2="18" y2="9" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+                    </svg>
+
+                    <div class="price-card">
+                        <span class="price-card-index">M-01</span>
+                        <div class="price-card-top">
+                            <div class="price-name-row">
+                                <h3 class="price-name">Monthly</h3>
+                                <div class="price-badge-group">
+                                    <span class="price-was">$8.99</span>
+                                    <span class="price-badge price-badge-muted">11% off</span>
+                                </div>
+                            </div>
+                            <p class="price-desc">Best value for growing businesses!</p>
+                        </div>
+                        <div class="price-card-bottom">
+                            <div class="price-amount">
+                                <span class="price-sym">$</span>
+                                <span class="price-num">7<span class="price-decimal">.99</span></span>
+                                <span class="price-per">/mo</span>
+                            </div>
+                            <!-- ✅ CHANGE 7: Pricing Monthly button now uses Flask url_for -->
+                            <a href="{{ url_for('login') }}" class="price-btn price-btn-ghost">
+                                <span>Start Your Journey</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 17L17 7M17 7H8M17 7V16"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="price-card price-card-featured">
+                        <div class="trail-ring" aria-hidden="true"></div>
+
+                        <span class="price-card-index">Y-02</span>
+                        <div class="price-card-top">
+                            <div class="price-name-row">
+                                <h3 class="price-name">Yearly</h3>
+                                <div class="price-badge-group">
+                                    <span class="price-was">$8.99</span>
+                                    <span class="price-badge price-badge-accent">22% off</span>
+                                </div>
+                            </div>
+                            <p class="price-desc">Unlock savings with an annual commitment!</p>
+                        </div>
+                        <div class="price-card-bottom">
+                            <div class="price-amount">
+                                <span class="price-sym">$</span>
+                                <span class="price-num">6<span class="price-decimal">.99</span></span>
+                                <span class="price-per">/mo</span>
+                            </div>
+                            <!-- ✅ CHANGE 8: Pricing Yearly button now uses Flask url_for -->
+                            <a href="{{ url_for('login') }}" class="price-btn price-btn-accent">
+                                <span>Get Started Now</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 17L17 7M17 7H8M17 7V16"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="pricing-guarantee">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                    <span>Access to all features with no hidden fees</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── FOOTER ─────────────────────────────────────────────────── -->
+    <footer class="site-footer">
+        <div class="site-footer-inner">
+
+            <div class="site-footer-glow" aria-hidden="true"></div>
+
+            <div class="site-footer-grid">
+
+                <div class="site-footer-brand" data-reveal>
+                    <div class="site-footer-mark" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="6" x2="2" y2="6"/>
+                            <line x1="22" y1="18" x2="2" y2="18"/>
+                            <line x1="6" y1="2" x2="6" y2="22"/>
+                            <line x1="18" y1="2" x2="18" y2="22"/>
+                        </svg>
+                    </div>
+                    <p class="site-footer-copy">© 2026 AMAS. All rights reserved.</p>
+                </div>
+
+                <div class="site-footer-cols">
+
+                    <div class="site-footer-col" data-reveal data-delay="0.1">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="#features">Features</a></li>
+                            <li><a href="#pricing">Pricing</a></li>
+                            <li><a href="#testimonials">Testimonials</a></li>
+                            <li><a href="/">Integration</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="site-footer-col" data-reveal data-delay="0.2">
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="/faqs">FAQs</a></li>
+                            <li><a href="/about">About Us</a></li>
+                            <li><a href="/privacy">Privacy Policy</a></li>
+                            <li><a href="/terms">Terms of Services</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="site-footer-col" data-reveal data-delay="0.3">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="/blog">Blog</a></li>
+                            <li><a href="/changelog">Changelog</a></li>
+                            <li><a href="/brand">Brand</a></li>
+                            <li><a href="/help">Help</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="site-footer-col" data-reveal data-delay="0.4">
+                        <h4>Social Links</h4>
+                        <ul>
+                            <li>
+                                <a href="#">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                                    </svg>
+                                    Facebook
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                                    </svg>
+                                    Instagram
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/>
+                                        <path d="m10 15 5-3-5-3z"/>
+                                    </svg>
+                                    Youtube
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                                        <rect width="4" height="12" x="2" y="9"/>
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    LinkedIn
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="../static/script.js"></script>
+
+    <script>
+    (function () {
+        // ---- Footer reveal (kept from original) ----
+        var els = document.querySelectorAll('.site-footer [data-reveal]');
+        if (!els.length) return;
+        if (!('IntersectionObserver' in window)) {
+            els.forEach(function (el) { el.classList.add('is-revealed'); });
+            return;
+        }
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    var el = entry.target;
+                    var delay = parseFloat(el.dataset.delay || 0) * 1000;
+                    setTimeout(function () { el.classList.add('is-revealed'); }, delay);
+                    observer.unobserve(el);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+        els.forEach(function (el) { observer.observe(el); });
+    })();
+
+    (function () {
+        // ---- Navbar mobile toggle ----
+        var toggle = document.getElementById('navbarToggle');
+        var mobile = document.getElementById('navbarMobile');
+        if (!toggle || !mobile) return;
+
+        toggle.addEventListener('click', function () {
+            var open = mobile.classList.toggle('is-open');
+            toggle.classList.toggle('is-open', open);
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
+
+        // Close mobile menu when a link is clicked
+        mobile.querySelectorAll('a').forEach(function (a) {
+            a.addEventListener('click', function () {
+                mobile.classList.remove('is-open');
+                toggle.classList.remove('is-open');
+                toggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+    })();
+    </script>
+
+</body>
+</html>
