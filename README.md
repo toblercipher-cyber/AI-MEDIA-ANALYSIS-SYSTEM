@@ -1,5 +1,45 @@
 # 🚀 AMAS - AI-Powered Media Analysis System
 
+<img width="1360" height="581" alt="Dashboard_page_insights_" src="https://github.com/user-attachments/assets/333d62f6-80db-4227-ae23-be55799de323" />
+
+<img width="1344" height="644" alt="History_page" src="https://github.com/user-attachments/assets/5fb91855-1647-4490-bab5-9d722806904f" />
+
+<img width="1348" height="566" alt="Faq_page_Last" src="https://github.com/user-attachments/assets/2b05772f-8b16-4f4b-9069-6ab21c54ab06" />
+
+<img width="1343" height="645" alt="Faq_page_contact_us_page" src="https://github.com/user-attachments/assets/a92d3c18-5a5a-4c16-8143-b5b0af1a6252" />
+
+<img width="1341" height="639" alt="FAQ+page_part_2" src="https://github.com/user-attachments/assets/f5d81947-cd99-4006-92ed-294bbb9a40db" />
+
+<img width="1360" height="640" alt="Faq_page_middle_division" src="https://github.com/user-attachments/assets/9327441a-8c5a-4b8a-8c7c-b46133c077a4" />
+
+<img width="1343" height="643" alt="Faq_page" src="https://github.com/user-attachments/assets/2de0662b-3a70-4ad5-a634-18cc5718171d" />
+
+<img width="1360" height="642" alt="Url_analysis_questions" src="https://github.com/user-attachments/assets/f557fed8-66e2-4b93-b4db-7d1299107e3e" />
+
+<img width="1353" height="644" alt="Url_analysis_response" src="https://github.com/user-attachments/assets/1d19395a-1032-4780-beaf-a5528063a115" />
+
+<img width="1358" height="642" alt="Url_analysis_loading" src="https://github.com/user-attachments/assets/cd6f47e3-0934-4ef1-b9dc-0f1f0b3de005" />
+
+<img width="1360" height="645" alt="LLm_response" src="https://github.com/user-attachments/assets/e7934573-cb99-474d-bc9a-f01507314c72" />
+<img width="1360" height="644" alt="Document_page" src="https://github.com/user-attachments/assets/026327c9-48da-4b19-b5b8-2b947d33f7f8" />
+
+<img width="1360" height="647" alt="Dashboard_page" src="https://github.com/user-attachments/assets/8026bb4c-e8e6-438e-8465-4f5210186408" />
+
+<img width="1352" height="638" alt="Login_page" src="https://github.com/user-attachments/assets/2236a609-e2f1-44fd-a514-bc6fa395fd9c" />
+
+<img width="1347" height="634" alt="Registration_page" src="https://github.com/user-attachments/assets/8863f362-20c3-4b12-9154-d18d9895bb31" />
+
+<img width="1360" height="644" alt="Landing_page_part_3" src="https://github.com/user-attachments/assets/27e3ab45-8e25-46d4-ac40-343bff6a16e8" />
+
+<img width="1360" height="643" alt="Landing_page_part_4" src="https://github.com/user-attachments/assets/8c1c91e4-dfcc-4e0d-89fd-0c31b0fb7afa" />
+
+
+<img width="1360" height="635" alt="Landing_page_part2" src="https://github.com/user-attachments/assets/68437b4f-4498-4bee-b828-c95163ed1f42" />
+
+<img width="1360" height="645" alt="Landing_page" src="https://github.com/user-attachments/assets/af5a6d19-6027-4862-a5a3-1278b6e46032" />
+
+
+
 > **Complete RAG Application for Intelligent Content Analysis**
 > Transform any video, document, or URL into actionable insights using advanced AI and machine learning.
 
