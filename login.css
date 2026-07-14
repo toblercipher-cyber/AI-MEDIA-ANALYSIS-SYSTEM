@@ -1,0 +1,338 @@
+:root {
+    --bg:         #020202;
+    --accent:     #00C2FF;
+    --accent-dim: rgba(0, 194, 255, 0.15);
+    --white:      #FFFFFF;
+    --muted:      rgba(255, 255, 255, 0.35);
+    --glass-bg:   rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--font-display);
+    overflow-x: hidden;
+}
+
+#bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ---------- Layout ---------- */
+.signin {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1.5rem;
+    gap: 3rem;
+}
+
+/* ---------- Card ---------- */
+.signin-card {
+    position: relative;
+    width: 100%;
+    max-width: 26rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(18,18,18,0.5) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 2.75rem 2.25rem 2.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    opacity: 0;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ---------- Brand mark ---------- */
+.signin-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--white);
+    align-self: center;
+}
+
+.signin-mark svg {
+    display: block;
+}
+
+/* ---------- Header block ---------- */
+.signin-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    text-align: center;
+}
+
+.signin-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.signin-eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--accent);
+}
+
+.signin-eyebrow-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.signin-title {
+    font-size: clamp(2.25rem, 6vw, 3rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--white);
+}
+
+.signin-title-outline {
+    -webkit-text-stroke: 1.5px var(--white);
+    color: transparent;
+}
+
+.signin-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    max-width: 280px;
+}
+
+/* ---------- Form ---------- */
+.signin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.signin-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.signin-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+}
+
+.signin-input {
+    width: 100%;
+    padding: 0.85rem 1.1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.04);
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    outline: none;
+}
+
+.signin-input::placeholder {
+    color: rgba(255,255,255,0.2);
+}
+
+.signin-input:hover {
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+}
+
+.signin-input:focus {
+    border-color: rgba(0,194,255,0.5);
+    background: rgba(0,194,255,0.05);
+    box-shadow: 0 0 0 3px rgba(0,194,255,0.08);
+}
+
+/* ---------- Error ---------- */
+.signin-error {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #ff6b6b;
+    text-align: left;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid rgba(255,107,107,0.2);
+    border-radius: 8px;
+    background: rgba(255,107,107,0.06);
+}
+
+/* ---------- Submit button ---------- */
+.signin-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: #000000;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.3s ease;
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.2),
+        0 0 24px rgba(0,194,255,0.25),
+        0 4px 16px rgba(0,0,0,0.4);
+    margin-top: 0.5rem;
+}
+
+.signin-btn:hover {
+    transform: translateY(-1px);
+    background: #19ccff;
+    box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.3),
+        0 0 36px rgba(0,194,255,0.4),
+        0 6px 20px rgba(0,0,0,0.5);
+}
+
+.signin-btn:active {
+    transform: scale(0.975);
+}
+
+.signin-btn svg {
+    flex-shrink: 0;
+}
+
+/* ---------- Footer link ---------- */
+.signin-foot {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.3);
+}
+
+.signin-link {
+    color: var(--white);
+    text-decoration: none;
+    margin-left: 0.4rem;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 1px;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.signin-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* ---------- Meta section ---------- */
+.signin-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 26rem;
+    text-align: center;
+}
+
+.signin-meta-text {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.signin-meta-highlight {
+    color: var(--white);
+    font-weight: 700;
+}
+
+.signin-avatars {
+    display: flex;
+    align-items: center;
+}
+
+.signin-avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    background: linear-gradient(135deg, var(--accent), #006699);
+    margin-left: -0.5rem;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.signin-avatar:first-child {
+    margin-left: 0;
+}
+
+.signin-avatar:nth-child(2) { background: linear-gradient(135deg, #ff6b6b, #c92a2a); }
+.signin-avatar:nth-child(3) { background: linear-gradient(135deg, #ffd93d, #f59f00); }
+.signin-avatar:nth-child(4) { background: linear-gradient(135deg, #51cf66, #2f9e44); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 480px) {
+    .signin {
+        padding: 3rem 1rem;
+        gap: 2rem;
+    }
+    .signin-card {
+        padding: 2rem 1.5rem 1.75rem;
+        border-radius: 1.25rem;
+    }
+    .signin-title {
+        font-size: 2rem;
+    }
+    .signin-btn {
+        padding: 0.8rem 1.5rem;
+    }
+}

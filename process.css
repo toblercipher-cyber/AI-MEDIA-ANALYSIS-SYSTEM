@@ -1,0 +1,543 @@
+/* ============================================
+   PROCESS.CSS — AMAS
+   Scope: "Process" route — scan/visual + URL input bar.
+   Theme shares tokens with results.css / hero.css
+   ============================================ */
+
+/* ---------- Tokens (mirror results.css) ---------- */
+:root {
+    --bg:           #020202;
+    --accent:       #00C2FF;
+    --accent-soft:  rgba(0, 194, 255, 0.6);
+    --accent-glow:  rgba(0, 194, 255, 0.9);
+    --white:        #FFFFFF;
+    --muted:        rgba(255, 255, 255, 0.35);
+    --glass-bg:     rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+}
+
+/* ---------- Reset & Base ---------- */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--font-display);
+    overflow-x: hidden;
+}
+
+/* ---------- Three.js Canvas ---------- */
+#bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* ---------- Parallax Star Layers ---------- */
+#stars, #stars2, #stars3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#stars  { animation: starDrift 200s linear infinite; }
+#stars2 { animation: starDrift 300s linear infinite; }
+#stars3 { animation: starDrift 400s linear infinite; }
+
+@keyframes starDrift {
+    from { transform: translateY(0); }
+    to   { transform: translateY(-2000px); }
+}
+
+/* ============================================
+   WHITE PARTICLES — flowing down
+   25 elements, each falls from above the viewport
+   to below it, with staggered delays, durations,
+   and horizontal offsets for a snow / rain feel.
+   ============================================ */
+.particles {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    top: -10vh;
+    left: var(--x, 50%);
+    width: var(--size, 2px);
+    height: var(--size, 2px);
+    background: #ffffff;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+    animation: particle-fall var(--dur, 14s) linear var(--delay, 0s) infinite;
+}
+
+@keyframes particle-fall {
+    0% {
+        transform: translate3d(0, 0, 0);
+        opacity: 0;
+    }
+    10% {
+        opacity: var(--peak, 0.6);
+    }
+    90% {
+        opacity: var(--peak, 0.6);
+    }
+    100% {
+        transform: translate3d(20px, 120vh, 0);
+        opacity: 0;
+    }
+}
+
+/* Horizontal positions + timing variety for 25 particles */
+.particle:nth-child(1)  { --x: 4%;   --size: 1.5px; --dur: 16s; --delay: 0s;    --peak: 0.7; }
+.particle:nth-child(2)  { --x: 9%;   --size: 2px;   --dur: 12s; --delay: 3s;    --peak: 0.5; }
+.particle:nth-child(3)  { --x: 14%;  --size: 1px;   --dur: 18s; --delay: 6s;    --peak: 0.8; }
+.particle:nth-child(4)  { --x: 19%;  --size: 2.5px; --dur: 14s; --delay: 1s;    --peak: 0.6; }
+.particle:nth-child(5)  { --x: 24%;  --size: 1.5px; --dur: 20s; --delay: 4s;    --peak: 0.4; }
+.particle:nth-child(6)  { --x: 29%;  --size: 1px;   --dur: 11s; --delay: 7s;    --peak: 0.9; }
+.particle:nth-child(7)  { --x: 34%;  --size: 2px;   --dur: 15s; --delay: 2s;    --peak: 0.5; }
+.particle:nth-child(8)  { --x: 39%;  --size: 1.5px; --dur: 13s; --delay: 5s;    --peak: 0.7; }
+.particle:nth-child(9)  { --x: 44%;  --size: 2.5px; --dur: 17s; --delay: 8s;    --peak: 0.4; }
+.particle:nth-child(10) { --x: 49%;  --size: 1px;   --dur: 19s; --delay: 0.5s;  --peak: 0.8; }
+.particle:nth-child(11) { --x: 54%;  --size: 2px;   --dur: 12s; --delay: 3.5s;  --peak: 0.6; }
+.particle:nth-child(12) { --x: 59%;  --size: 1.5px; --dur: 16s; --delay: 6.5s;  --peak: 0.5; }
+.particle:nth-child(13) { --x: 64%;  --size: 2px;   --dur: 14s; --delay: 1.5s;  --peak: 0.7; }
+.particle:nth-child(14) { --x: 69%;  --size: 1px;   --dur: 18s; --delay: 4.5s;  --peak: 0.9; }
+.particle:nth-child(15) { --x: 74%;  --size: 2.5px; --dur: 13s; --delay: 7.5s;  --peak: 0.4; }
+.particle:nth-child(16) { --x: 79%;  --size: 1.5px; --dur: 15s; --delay: 2.5s;  --peak: 0.6; }
+.particle:nth-child(17) { --x: 84%;  --size: 2px;   --dur: 17s; --delay: 5.5s;  --peak: 0.5; }
+.particle:nth-child(18) { --x: 89%;  --size: 1px;   --dur: 11s; --delay: 8.5s;  --peak: 0.8; }
+.particle:nth-child(19) { --x: 94%;  --size: 2.5px; --dur: 19s; --delay: 0.2s;  --peak: 0.4; }
+.particle:nth-child(20) { --x: 7%;   --size: 1.5px; --dur: 14s; --delay: 4.2s;  --peak: 0.7; }
+.particle:nth-child(21) { --x: 22%;  --size: 2px;   --dur: 16s; --delay: 9s;    --peak: 0.5; }
+.particle:nth-child(22) { --x: 37%;  --size: 1px;   --dur: 12s; --delay: 1.8s;  --peak: 0.9; }
+.particle:nth-child(23) { --x: 52%;  --size: 2.5px; --dur: 18s; --delay: 6.2s;  --peak: 0.4; }
+.particle:nth-child(24) { --x: 67%;  --size: 1.5px; --dur: 13s; --delay: 3.2s;  --peak: 0.6; }
+.particle:nth-child(25) { --x: 82%;  --size: 2px;   --dur: 15s; --delay: 7.8s;  --peak: 0.5; }
+
+/* ============================================
+   PAGE LAYOUT
+   ============================================ */
+.process {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+}
+
+.process-stage {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+    opacity: 0;
+}
+
+/* ============================================
+   PROCESS HEADER — eyebrow + title
+   ============================================ */
+.process-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.process-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.process-eyebrow-dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent);
+    flex-shrink: 0;
+}
+
+.process-eyebrow-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: eyebrow-ping 1.8s ease-in-out infinite;
+    opacity: 0.5;
+}
+
+@keyframes eyebrow-ping {
+    0%   { transform: scale(1);   opacity: 0.5; }
+    70%  { transform: scale(2.4); opacity: 0;   }
+    100% { transform: scale(2.4); opacity: 0;   }
+}
+
+.process-eyebrow-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.process-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
+    color: var(--white);
+}
+
+.process-title-outline {
+    -webkit-text-stroke: 2px var(--white);
+    color: transparent;
+}
+
+/* ============================================
+   SCAN VISUAL (bot-detection, CSS-only)
+   300 × 300px box, no text inside.
+   Concentric dashed rings + rotating beam +
+   9 static detection dots + a moving cursor
+   that travels between them continuously.
+   ============================================ */
+.scan {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    max-width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+}
+
+/* ---- Concentric dashed rings (top-half arcs) ---- */
+.scan-ring {
+    position: absolute;
+    left: 50%;
+    border-top: 1px dashed rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.scan-ring-1 { top: 40px;  width: 130%; height: 100%; }
+.scan-ring-2 { top: 90px;  width: 110%; height: 100%; }
+.scan-ring-3 { top: 140px; width: 100%; height: 100%; }
+.scan-ring-4 { top: 190px; width: 80%;  height: 100%; }
+
+/* ---- Static detection dots (the SVG inside .scan-dots) ---- */
+.scan-dots {
+    position: absolute;
+    inset: 0;
+    animation: scan-dots-pulse 2.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes scan-dots-pulse {
+    0%, 100% { opacity: 0.7; }
+    50%      { opacity: 1;   }
+}
+
+/* ---- Rotating scan beam ---- */
+.scan-beam {
+    position: absolute;
+    bottom: 20px;
+    left: 148px;
+    width: 250px;
+    height: 250px;
+    transform-origin: bottom left;
+    pointer-events: none;
+    background: radial-gradient(
+        circle at 0% 100%,
+        rgba(255, 255, 255, 0.25) 5%,
+        transparent 60%
+    );
+    opacity: 0.7;
+    animation: scan-beam-sweep 6s ease-in-out infinite;
+}
+
+@keyframes scan-beam-sweep {
+    0%   { transform: rotate(-55deg); opacity: 0.7; }
+    50%  { transform: rotate(-40deg); opacity: 1;   }
+    100% { transform: rotate(-55deg); opacity: 0.7; }
+}
+
+/* ---- Moving cursor (the highlight that scans the dots) ---- */
+.scan-cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6.5px;
+    height: 6.5px;
+    transform: translate(34px, 80px);
+    pointer-events: none;
+    animation: cursor-path 27s linear infinite;
+    will-change: transform;
+}
+
+@keyframes cursor-path {
+    0%      { transform: translate(34px, 80px);   }
+    11.11%  { transform: translate(90px, 161px);  }
+    22.22%  { transform: translate(230px, 120px); }
+    33.33%  { transform: translate(165px, 203px); }
+    44.44%  { transform: translate(120px, 100px); }
+    55.55%  { transform: translate(15px, 164px);  }
+    66.66%  { transform: translate(61px, 238px);  }
+    77.77%  { transform: translate(237px, 180px); }
+    88.88%  { transform: translate(204px, 53px);  }
+    100%    { transform: translate(34px, 80px);   }
+}
+
+.scan-cursor-dot {
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    border-radius: 1px;
+    box-shadow: 0 0 10px 4px var(--accent-glow);
+    animation: cursor-dot-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes cursor-dot-pulse {
+    0%, 100% { transform: scale(1);   }
+    50%      { transform: scale(1.2); }
+}
+
+.scan-cursor-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6.5px;
+    height: 6.5px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0;
+    animation: cursor-ring-pulse 3s ease-out infinite;
+}
+
+.scan-cursor-ring-2 { animation-delay: 0.4s; }
+
+@keyframes cursor-ring-pulse {
+    0%   { transform: translate(-50%, -50%) scale(1);   opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(4.5); opacity: 0;   }
+}
+
+/* ---- Central hub (mirrors React component's bottom circle) ---- */
+.scan-hub {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #000;
+    pointer-events: none;
+}
+
+/* ============================================
+   SEARCH BAR (URL input)
+   ============================================ */
+.process-form {
+    width: 100%;
+}
+
+.process-bar {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.process-bar:focus-within {
+    border-color: rgba(0, 194, 255, 0.3);
+    background: rgba(0, 194, 255, 0.04);
+}
+
+.process-toolbar {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem 0;
+}
+
+.process-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.7rem;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.process-add:hover {
+    color: var(--white);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.process-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    color: var(--white);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+}
+
+.process-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.02em;
+}
+
+.process-submit {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    cursor: pointer;
+    box-shadow: 0 0 24px rgba(0, 194, 255, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.2s ease;
+}
+
+.process-submit svg {
+    width: 16px;
+    height: 16px;
+}
+
+.process-submit:hover {
+    background: #19ccff;
+    box-shadow: 0 0 36px rgba(0, 194, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+.process-submit:active {
+    transform: scale(0.96);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+    .process {
+        padding: 3rem 1.25rem;
+    }
+
+    .scan {
+        width: 100%;
+        max-width: 300px;
+        height: 280px;
+    }
+
+    .process-stage {
+        gap: 2.5rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .scan {
+        height: 240px;
+    }
+
+    .scan-ring-1 { top: 30px; }
+    .scan-ring-2 { top: 70px; }
+    .scan-ring-3 { top: 110px; }
+    .scan-ring-4 { top: 150px; }
+
+    .scan-beam {
+        width: 200px;
+        height: 200px;
+        left: 100px;
+    }
+
+    .scan-hub {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    .particle,
+    #stars, #stars2, #stars3,
+    .process-eyebrow-dot::after,
+    .scan-dots,
+    .scan-beam,
+    .scan-cursor,
+    .scan-cursor-dot,
+    .scan-cursor-ring {
+        animation: none !important;
+    }
+    .scan-cursor {
+        transform: translate(34px, 80px);
+    }
+    .scan-beam {
+        transform: rotate(-45deg);
+        opacity: 0.9;
+    }
+    .particle {
+        opacity: 0.4;
+        top: 50%;
+    }
+}
